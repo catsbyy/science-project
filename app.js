@@ -8,7 +8,6 @@ const app = express();
 
 app.use(cors());
 
-
 app.listen(PORT, () => {
   console.log(`Server is working on port ${PORT}`);
 });
@@ -51,7 +50,6 @@ app.get('/server', async (req, res) => {
     techAndTools: techAndTools
   })
 });
-
 
 
 // отримання усіх кандидатів
