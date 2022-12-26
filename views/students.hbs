@@ -1,0 +1,300 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/style.css" />
+
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag/dist/css/multi-select-tag.css">
+
+    <title>SP App</title>
+  </head>
+  <header class="header">
+        <nav class="nav-wrapper">
+            <div class="container-wide">
+                <div class="row space-between align-center">
+                    <a href="/">
+                      <div class="logo">SnB</div>
+                  </a>
+
+                    <div class="nav">
+                        <ul>
+                            <li><a href="/">Головна</a></li>
+                            <li><a href="/students">Студенту</a></li>
+                            <li><a href="/business">Роботодавцю</a></li>
+                        </ul>
+                    </div>
+
+                    <a href="https://shop.lanadelrey.polydor.co.uk/?utm_campaign=LanaDelRey20190730&utm_content=&utm_medium=owned&utm_source=Website&utm_linkurl=Lana.lnk.to%2FStore&utm_board=lana-del-rey&utm_country=GB&utm_referrer=www.lanadelrey.com%2F" target="_blank" class="store">
+                        <img src="./img/icons/cart.svg" alt="cart" />
+                        щось
+                    </a>
+                    <button class="nav-button">
+                        <span class="nav-button-icon"></span>
+                    </button>
+
+                    <div class="mobile-nav">
+                        <div class="nav">
+                            <ul>
+                                <li><a href="/">Головна</a></li>
+                                <li><a href="/students">Студенту</a></li>
+                                <li><a href="/business">Роботодавцю</a></li>
+                            </ul>
+                        </div>
+                        <a href="https://shop.lanadelrey.polydor.co.uk/?utm_campaign=LanaDelRey20190730&utm_content=&utm_medium=owned&utm_source=Website&utm_linkurl=Lana.lnk.to%2FStore&utm_board=lana-del-rey&utm_country=GB&utm_referrer=www.lanadelrey.com%2F" target="_blank" class="store">
+                            <img src="./img/icons/cart.svg" alt="cart" />
+                            щось
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+  <body class="students-body">
+    <div class="container">
+      <header>Анкета кандидата</header>
+
+      <form action="#" name="registrationForm" method="post">
+        <div class="form first">
+          <div class="details personal">
+            <span class="title">Персональні дані</span>
+
+            <div class="fields">
+              <div class="input-field">
+                <label>Прізвище *</label>
+                <input name="studentSurname" type="text" placeholder="Введіть ваше прізвище" required />
+              </div>
+
+              <div class="input-field">
+                <label>Ім'я *</label>
+                <input name="studentName" type="text" placeholder="Введіть ваше ім'я" required />
+              </div>
+
+              <div class="input-field">
+                <label>По-батькові *</label>
+                <input name="studentPatronymic" type="text" placeholder="Введіть ваше по-батькові" required />
+              </div>
+
+              <div class="input-field">
+                <label>Дата народження *</label>
+                <input name="studentDateOfBirth" type="date" placeholder="Enter birth date" required />
+              </div>
+
+              <div class="input-field">
+                <label>Мобільний номер *</label>
+                <input name="studentMobNumber" type="number" placeholder="Введіть мобільний номер" required />
+              </div>
+
+              <div class="input-field">
+                <label>Електронна пошта *</label>
+                <input name="studentEmail" type="email" placeholder="Введіть електронну пошту" required />
+              </div>
+
+            </div>
+          </div>
+
+          <div class="details address">
+            <span class="title">Адреса та додаткові контакти</span>
+
+            <div class="fields">
+              <div class="input-field">
+                <label>Область *</label>
+                
+                <select required name="studentRegion">
+                  <option disabled selected>Оберіть вашу область</option>
+                  {{#each regions}}
+                       <option value="{{id}}">{{region_name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+
+              <div class="input-field">
+                <label>Місто *</label>
+                <input name="studentCity" type="text" placeholder="Введіть ваше місто" required />
+              </div>
+
+              <div class="input-field">
+                <label>Вулиця *</label>
+                <input name="studentStreet" type="text" placeholder="Введіть вашу вулицю" required/>
+              </div>
+
+              <div class="input-field">
+                <label>Номер будинку *</label>
+                <input name="studentHouseNum" type="text" placeholder="Введіть номер будинку" required/>
+              </div>
+
+              <div class="input-field">
+                <label>LinkedIn</label>
+                <input name="studentLinkedin" type="url" placeholder="Введіть посилання на LinkedIn" />
+              </div>
+
+              <div class="input-field">
+                <label>GitHub</label>
+                <input name="studentGithub" type="url" placeholder="Введіть посилання на GitHub" />
+              </div>
+
+            </div>
+          
+              <button class="nextBtn">
+                <span class="btnText">Далі</span>
+                <i class="uil uil-navigator"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form second">
+            <div class="details educationAndWork">
+              <span class="title">Освіта</span>
+
+              <div class="fields">
+                <div class="input-field">
+                  <label>Рівень освіти *</label>
+                  <select required name="studentEducation" >
+                    <option disabled selected>Оберіть рівень освіти</option>
+                    <option>Вища</option>
+                    <option>Фахова передвища</option>
+                    <option>Професійно-технічна</option>
+                    <option>Повна середня</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label>Заклад освіти *</label>
+                  <input name="studentUniversity" type="text" placeholder="Введіть заклад освіти" required />
+                </div>
+
+                <div class="input-field">
+                  <label>Спеціальність</label>
+                  <input name="studentSpecialty" type="text" placeholder="Введіть спеціальність"/>
+                </div>
+
+                <div class="input-field" id="input-field-technologies">
+                  <label>Технології та інструменти *</label>
+                  <select id="studentTechAndTools" name="studentTechAndTools" placeholder="Технології та інструменти" required>
+                    <option disabled selected>Технології та інструменти</option>
+                    {{#each techAndTools}}
+                       <option value="{{id}}">{{name}}</option>
+                    {{/each}}
+                  </select>
+                  
+                </div>
+
+                <div class="input-field">
+                  <label>Рівень англійської *</label>
+                  <select required name="studentEnglish" >
+                    <option disabled selected>Оберіть рівень англійської</option>
+                    <option>Beginner - A1</option>
+                    <option>Elementary - A2</option>
+                    <option>Pre-Intermediate - A2+</option>
+                    <option>Intermediate - B1</option>
+                    <option>Upper-Intermediate - B2</option>
+                    <option>Advanced - C1</option>
+                    <option>Proficient - C2</option>
+                  </select>
+                 </div>
+
+                 <div class="input-field">
+                  <label>Коротка розповідь про себе</label>
+                  <input name="studentSummary" type="text" placeholder="Опис декількома реченнями"/>
+                </div>
+
+              </div>
+</div>
+          <div class="details work">
+            <span class="title">Робота</span>
+
+            <div class="fields">
+              
+              <div class="input-field">
+                  <label>Посада *</label>
+                  <select required name="studentPosition" >
+                    <option disabled selected>Оберіть посаду</option>
+                    <option>Інтерн</option>
+                    <option>Джуніор-розробник</option>
+                    <option>Мідл-розробник</option>
+                    <option>Сеньйор-розробник</option>
+                    <option>Архітектор</option>
+                    <option>Веб-дизайнер</option>
+                    <option>QA-інженер</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label>Досвід роботи *</label>
+                  <select required name="studentWorkExp" >
+                    <option disabled selected>Оберіть досвід роботи</option>
+                      <option>0</option>
+                      <option>0.5+</option>
+                      <option>1+</option>
+                      <option>1.5+</option>
+                      <option>2+</option>
+                      <option>3+</option>
+                      <option>5+</option>
+                  </select>
+                </div>
+
+                <div class="input-field">
+                  <label>Область роботи *</label>
+                  <select required name="studentWorkArea" >
+                    <option disabled selected>Оберіть область роботи</option>
+                    <option>Front End</option>
+                    <option>Back End</option>
+                    <option>Full Stack</option>
+                    <option>Web Design</option>
+                    <option>Quality Assurance</option>
+                  </select>
+                </div>
+
+              <div class="input-field">
+                <label>Очікувана заробітна плата</label>
+                <select name="studentSalary" >
+                  <option disabled selected>Оберіть заробітну плату ($)</option>
+                  <option>300-500</option>
+                  <option>500-1000</option>
+                  <option>1000-2000</option>
+                  <option>2000-5000</option>
+                  <option>5000+</option>
+                </select>
+              </div>
+
+              <div class="input-field">
+                            <label>Місце роботи</label>
+                            <select name="studentWorkplace" >
+                                <option disabled selected>Оберіть місце роботи</option>
+                                <option>Неважливо</option>
+                                <option>Віддалено</option>
+                                <option>Офіс</option>
+                                <option>Віддалено/офіс</option>
+                            </select>
+                        </div>
+
+              <div class="input-field">
+                  <label>Профільна картинка</label>
+                  <input name="studentProfilePic" type="url" placeholder="Введіть посилання на картинку"/>
+                </div>
+
+            </div>
+
+            <div class="buttons">
+              <div class="backBtn">
+                <i class="uil uil-navigator"></i>
+                <span class="btnText">Назад</span>
+              </div>
+
+              <button class="sumbit">
+                <span class="btnText">Підтвердити</span>
+                <i class="uil uil-navigator"></i>
+              </button>
+            </div>
+          </div>
+        
+      </form>
+    </div>
+
+    <script src="js/scriptStudent.js"></script>
+  </body>
+</html>
