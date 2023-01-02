@@ -51,6 +51,14 @@ app.get('/server', async (req, res) => {
   })
 });
 
+app.get('/get-results', async (req, res) => {
+  const studentsSql = "SELECT * FROM student_details";
+  const students = await connectionPromise(studentsSql, "");
+  res.json({
+    students: students
+  })
+});
+
 
 // отримання усіх кандидатів
 // connection.query("SELECT * FROM student_details", function (err, results, fields) {
