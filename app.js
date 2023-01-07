@@ -59,6 +59,15 @@ app.get('/get-results', async (req, res) => {
   })
 });
 
+app.get('/get-student-details', async (req, res) => {
+  const studentSql = `SELECT * FROM student_details WHERE student_details.id = 3`;
+  const student = await connectionPromise(studentSql, "");
+  
+  res.json({
+    student: student
+  })
+});
+
 
 // отримання усіх кандидатів
 // connection.query("SELECT * FROM student_details", function (err, results, fields) {
