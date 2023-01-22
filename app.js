@@ -52,6 +52,7 @@ app.get('/server', async (req, res) => {
 });
 
 app.get('/get-results', async (req, res) => {
+  console.log(req.query);
   const studentsSql = "SELECT * FROM student_details";
   const students = await connectionPromise(studentsSql, "");
   res.json({
@@ -59,15 +60,14 @@ app.get('/get-results', async (req, res) => {
   })
 });
 
-app.get('/get-student-details', async (req, res) => {
-  const studentSql = `SELECT * FROM student_details WHERE student_details.id = 3`;
+app.get('/get-student-details/:id', async (req, res) => {
+  const studentSql = `SELECT * FROM student_details WHERE student_details.id = ${req.params.id}`;
   const student = await connectionPromise(studentSql, "");
   
   res.json({
     student: student
   })
 });
-
 
 // отримання усіх кандидатів
 // connection.query("SELECT * FROM student_details", function (err, results, fields) {
