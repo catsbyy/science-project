@@ -53,7 +53,12 @@ app.get('/server', async (req, res) => {
 
 app.get('/get-results', async (req, res) => {
   console.log(req.query);
-  const studentsSql = "SELECT * FROM student_details";
+  let studentsSql = "";
+  if (Object.keys(req.query).length === 0)
+    studentsSql = `SELECT * FROM student_details`;
+  else {
+    studentsSql = `SELECT * FROM student_details WHERE student_details.position = "${req.query.studentPosition}"`;
+  }
   const students = await connectionPromise(studentsSql, "");
   res.json({
     students: students
