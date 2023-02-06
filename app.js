@@ -57,8 +57,10 @@ app.get('/get-results', async (req, res) => {
   if (Object.keys(req.query).length === 0)
     studentsSql = `SELECT * FROM student_details`;
   else {
-    studentsSql = `SELECT * FROM student_details WHERE student_details.position = "${req.query.studentPosition}"`;
+    studentsSql = formSqlForSearch(req.query);
+    //`SELECT * FROM student_details WHERE student_details.position = "${req.query.studentPosition}"`;
   }
+  console.log(studentsSql);
   const students = await connectionPromise(studentsSql, "");
   res.json({
     students: students
@@ -109,4 +111,6 @@ app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
 });
 
-
+const formSqlForSearch = function (params) {
+    return `SELECT * FROM student_details WHERE student_details.position = "${params.studentPosition}"`;
+}
