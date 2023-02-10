@@ -55,7 +55,8 @@ app.get("/server", async (req, res) => {
 app.get("/get-results", async (req, res) => {
   console.log(req.query);
   let studentsSql = `SELECT * FROM student_details`;
-  //formSqlForSearch(req.query);
+  //getResultsByFilters(req.query);
+  // функция возвращает готовый список студентов, поэтому удали sql запрос ниже!
 
   console.log(studentsSql);
   const students = await connectionPromise(studentsSql, "");
@@ -108,7 +109,7 @@ app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
 });
 
-const formSqlForSearch = async function (params) {
+const getResultsByFilters = async function (params) {
   let studentsSql = "";
   if (Object.keys(params).length === 0) studentsSql = `SELECT * FROM student_details`;
   else {
