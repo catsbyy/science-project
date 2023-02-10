@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const express = require("express");
-const cors = require('cors');
+const cors = require("cors");
 const { get } = require("./routes/studentRouter");
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -19,15 +19,16 @@ const connection = mysql.createConnection({
   password: "DifficultPassw12",
 });
 
-const connectionPromise = (url, data) =>  new Promise((resolve, reject) => {
-  connection.query(url, data, function (err, results, fields) {
-      if(err) {
+const connectionPromise = (url, data) =>
+  new Promise((resolve, reject) => {
+    connection.query(url, data, function (err, results, fields) {
+      if (err) {
         reject(err);
-      return;
-    }
-    resolve(results)
+        return;
+      }
+      resolve(results);
+    });
   });
-});
 
 exports.connection = connectionPromise;
 
@@ -40,40 +41,35 @@ connection.connect(function (err) {
   }
 });
 
-app.get('/server', async (req, res) => {
+app.get("/server", async (req, res) => {
   const sqlRegions = "SELECT * FROM regions";
   const regions = await connectionPromise(sqlRegions, "");
   const sqlTechAndTools = "SELECT * FROM technologies_and_tools";
-  const techAndTools =  await connectionPromise(sqlTechAndTools, "");
+  const techAndTools = await connectionPromise(sqlTechAndTools, "");
   res.json({
     regions: regions,
-    techAndTools: techAndTools
-  })
+    techAndTools: techAndTools,
+  });
 });
 
-app.get('/get-results', async (req, res) => {
+app.get("/get-results", async (req, res) => {
   console.log(req.query);
-  let studentsSql = "";
-  if (Object.keys(req.query).length === 0)
-    studentsSql = `SELECT * FROM student_details`;
-  else {
-    studentsSql = formSqlForSearch(req.query);
-    //`SELECT * FROM student_details WHERE student_details.position = "${req.query.studentPosition}"`;
-  }
+  let studentsSql = formSqlForSearch(req.query);
+
   console.log(studentsSql);
   const students = await connectionPromise(studentsSql, "");
   res.json({
-    students: students
-  })
+    students: students,
+  });
 });
 
-app.get('/get-student-details/:id', async (req, res) => {
+app.get("/get-student-details/:id", async (req, res) => {
   const studentSql = `SELECT * FROM student_details WHERE student_details.id = ${req.params.id}`;
   const student = await connectionPromise(studentSql, "");
-  
+
   res.json({
-    student: student
-  })
+    student: student,
+  });
 });
 
 // отримання усіх кандидатів
@@ -98,7 +94,7 @@ const studentRouter = require("./routes/studentRouter.js");
 const businessRouter = require("./routes/businessRouter.js");
 const successfulRegRouter = require("./routes/successfulRegRouter.js");
 
-app.set("view engine", "hbs"); 
+app.set("view engine", "hbs");
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/users", userRouter);
@@ -111,6 +107,102 @@ app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
 });
 
-const formSqlForSearch = function (params) {
-    return `SELECT * FROM student_details WHERE student_details.position = "${params.studentPosition}"`;
-}
+const formSqlForSearch = async function (params) {
+  let studentsSql = "";
+  if (Object.keys(params).length === 0) studentsSql = `SELECT * FROM student_details`;
+  else {
+    studentsSql = formSql(params);
+    const techAndToolsIds = params.studentTechAndTools
+      .split(";")
+      .filter(function (el) {
+        return el != "";
+      })
+      .map(Number);
+
+    // співпадіння по посаді
+    let positionMatches;
+    if (params.studentPosition !== "" || params.studentPosition !== null)
+      positionMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.position = "${params.studentPosition}"`,
+        ""
+      );
+
+    // співпадіння по області роботи
+    let workAreaMatches;
+    if (params.studentWorkArea !== "" || params.studentWorkArea !== null)
+      workAreaMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.work_area = "${params.studentWorkArea}"`,
+        ""
+      );
+    // співпадіння по досвіду роботи
+    let workExpMatches;
+    if (params.studentWorkExp !== "" || params.studentWorkExp !== null)
+      workExpMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.work_experience = "${params.studentWorkExp}"`,
+        ""
+      );
+    // співпадіння по технологіям
+    let techAndToolsMatches;
+    if (params.techAndToolsIds !== "" || params.techAndToolsIds !== null)
+      techAndToolsMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.technologies_and_tools = "${params.techAndToolsIds}"`,
+        ""
+      );
+    // співпадіння по англійській
+    let englishMatches;
+    if (params.studentEnglish !== "" || params.studentEnglish !== null)
+      englishMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.english_level = "${params.studentEnglish}"`,
+        ""
+      );
+    // співпадіння по освіті
+    let educationMatches;
+    if (params.studentEducation !== "" || params.studentEducation !== null)
+      educationMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.education_level = "${params.studentEducation}"`,
+        ""
+      );
+    // співпадіння по області
+    let regionMatches;
+    if (params.studentRegion !== "" || params.studentRegion !== null)
+      regionMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.regionId = "${params.studentRegion}"`,
+        ""
+      );
+    // співпадіння по місту
+    let cityMatches;
+    if (params.studentCity !== "" || params.studentCity !== null)
+      cityMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.city = "${params.studentCity}"`,
+        ""
+      );
+    // співпадіння по місцю роботи
+    let workplaceMatches;
+    if (params.studentWorkplace !== "" || params.studentWorkplace !== null)
+      workplaceMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.workplace = "${params.studentWorkplace}"`,
+        ""
+      );
+    // співпадіння по заробітній платі
+    let salaryMatches;
+    if (params.studentSalary !== "" || params.studentSalary !== null)
+      salaryMatches = await connectionPromise(
+        `SELECT * FROM student_details WHERE student_details.salary = "${params.studentSalary}"`,
+        ""
+      );
+
+    //`SELECT * FROM student_details WHERE student_details.position = "${params.studentPosition}"`;
+  }
+  //studentRegion
+  //studentCity
+  //studentEducation
+  //studentSalary
+  //studentWorkplace
+
+  //studentTechAndTools
+  //studentEnglish
+  //studentWorkExp
+  //studentPosition
+  //studentWorkArea
+  return studentSql;
+};
