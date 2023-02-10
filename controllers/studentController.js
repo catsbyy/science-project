@@ -1,7 +1,7 @@
 const app = require("../app.js");
 
 exports.students = async function (request, response) {
-    const sqlRegions = "SELECT * FROM regions";
+    const sqlRegions = "SELECT * FROM region";
     const regions = await connection(sqlRegions, "");
     const sqlTechAndTools = "SELECT * FROM technologies_and_tools";
     const techAndTools = await connection(sqlTechAndTools, "");
@@ -24,7 +24,7 @@ exports.postStudents = async function (request, response) {
        request.body.studentTechAndTools, request.body.studentPosition, request.body.studentWorkExp, request.body.studentWorkArea,
        request.body.studentSalary, request.body.studentWorkplace];
 
-    const sql = "INSERT INTO student_details(name, surname, patronymic, date_of_birth, summary, profile_picture, regionId, city, street, house_number, mobile_number, email, linkedin, github, education_level, university, specialty, english_level, technologies_and_tools, position, work_experience, work_area, salary, workplace) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const sql = "INSERT INTO student_details(name, surname, patronymic, date_of_birth, summary, profile_picture, region_id, city, street, house_number, mobile_number, email, linkedin, github, education_level_id, university, specialty, english_level_id, technologies_and_tools, position_id, work_experience_id, work_area_id, salary_id, workplace_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     await app.connection(sql, student);
 

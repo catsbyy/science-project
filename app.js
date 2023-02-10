@@ -42,7 +42,7 @@ connection.connect(function (err) {
 });
 
 app.get("/server", async (req, res) => {
-  const sqlRegions = "SELECT * FROM regions";
+  const sqlRegions = "SELECT * FROM region";
   const regions = await connectionPromise(sqlRegions, "");
   const sqlTechAndTools = "SELECT * FROM technologies_and_tools";
   const techAndTools = await connectionPromise(sqlTechAndTools, "");
@@ -54,7 +54,8 @@ app.get("/server", async (req, res) => {
 
 app.get("/get-results", async (req, res) => {
   console.log(req.query);
-  let studentsSql = formSqlForSearch(req.query);
+  let studentsSql = `SELECT * FROM student_details`;
+  //formSqlForSearch(req.query);
 
   console.log(studentsSql);
   const students = await connectionPromise(studentsSql, "");
@@ -111,7 +112,7 @@ const formSqlForSearch = async function (params) {
   let studentsSql = "";
   if (Object.keys(params).length === 0) studentsSql = `SELECT * FROM student_details`;
   else {
-    studentsSql = formSql(params);
+    //studentsSql = formSql(params);
     const techAndToolsIds = params.studentTechAndTools
       .split(";")
       .filter(function (el) {
@@ -123,7 +124,7 @@ const formSqlForSearch = async function (params) {
     let positionMatches;
     if (params.studentPosition !== "" || params.studentPosition !== null)
       positionMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.position = "${params.studentPosition}"`,
+        `SELECT * FROM student_details WHERE student_details.position_id = "${params.studentPosition}"`,
         ""
       );
 
@@ -131,14 +132,14 @@ const formSqlForSearch = async function (params) {
     let workAreaMatches;
     if (params.studentWorkArea !== "" || params.studentWorkArea !== null)
       workAreaMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.work_area = "${params.studentWorkArea}"`,
+        `SELECT * FROM student_details WHERE student_details.work_area_id = "${params.studentWorkArea}"`,
         ""
       );
     // співпадіння по досвіду роботи
     let workExpMatches;
     if (params.studentWorkExp !== "" || params.studentWorkExp !== null)
       workExpMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.work_experience = "${params.studentWorkExp}"`,
+        `SELECT * FROM student_details WHERE student_details.work_experience_id = "${params.studentWorkExp}"`,
         ""
       );
     // співпадіння по технологіям
@@ -152,21 +153,21 @@ const formSqlForSearch = async function (params) {
     let englishMatches;
     if (params.studentEnglish !== "" || params.studentEnglish !== null)
       englishMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.english_level = "${params.studentEnglish}"`,
+        `SELECT * FROM student_details WHERE student_details.english_level_id = "${params.studentEnglish}"`,
         ""
       );
     // співпадіння по освіті
     let educationMatches;
     if (params.studentEducation !== "" || params.studentEducation !== null)
       educationMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.education_level = "${params.studentEducation}"`,
+        `SELECT * FROM student_details WHERE student_details.education_level_id = "${params.studentEducation}"`,
         ""
       );
     // співпадіння по області
     let regionMatches;
     if (params.studentRegion !== "" || params.studentRegion !== null)
       regionMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.regionId = "${params.studentRegion}"`,
+        `SELECT * FROM student_details WHERE student_details.region_id = "${params.studentRegion}"`,
         ""
       );
     // співпадіння по місту
@@ -180,14 +181,14 @@ const formSqlForSearch = async function (params) {
     let workplaceMatches;
     if (params.studentWorkplace !== "" || params.studentWorkplace !== null)
       workplaceMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.workplace = "${params.studentWorkplace}"`,
+        `SELECT * FROM student_details WHERE student_details.workplace_id = "${params.studentWorkplace}"`,
         ""
       );
     // співпадіння по заробітній платі
     let salaryMatches;
     if (params.studentSalary !== "" || params.studentSalary !== null)
       salaryMatches = await connectionPromise(
-        `SELECT * FROM student_details WHERE student_details.salary = "${params.studentSalary}"`,
+        `SELECT * FROM student_details WHERE student_details.salary_id = "${params.studentSalary}"`,
         ""
       );
 
