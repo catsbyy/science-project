@@ -106,8 +106,12 @@ const getResultsByFilters = async function (params) {
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
     let techAndToolsIds = "";
-    
-    if (params.studentTechAndTools !== "" && params.studentTechAndTools !== null && params.studentTechAndTools !== undefined) {
+
+    if (
+      params.studentTechAndTools !== "" &&
+      params.studentTechAndTools !== null &&
+      params.studentTechAndTools !== undefined
+    ) {
       techAndToolsIds = params.studentTechAndTools
         .split(";")
         .filter(function (el) {
@@ -115,6 +119,8 @@ const getResultsByFilters = async function (params) {
         })
         .map(Number);
     }
+
+    console.log(techAndToolsIds);
 
     // основні параметри
     // співпадіння по посаді
@@ -136,10 +142,7 @@ const getResultsByFilters = async function (params) {
     );
 
     // співпадіння по технологіям - найголовніше
-    let techAndToolsMatches = await getMatchesByFilter(
-      techAndToolsIds,
-      `SELECT id FROM student_details WHERE student_details.technologies_and_tools = "${techAndToolsIds}"`
-    );
+    let techAndToolsMatches = await getMatchesByFilter(techAndToolsIds, formSqlForTechAndTools(techAndToolsIds));
 
     // співпадіння по англійській
     let englishMatches = await getMatchesByFilter(
@@ -178,16 +181,10 @@ const getResultsByFilters = async function (params) {
       `SELECT id FROM student_details WHERE student_details.salary_id = "${params.studentSalary}"`
     );
 
-    // перетини результатів - пошук ідеальних кандидатів
+    // перетини результатів - пошук кандидатів
 
-    result = (workExpMatches.filter((el) => positionMatches.includes(el))).toString();
-
-    console.log(result);
-
-    students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");;
     /*
     let set1 = techAndToolsMatches.filter((el) => workAreaMatches.includes(el));
-    
     let set2 = set1.filter((el) => positionMatches.includes(el));
     let set3 = set2.filter((el) => englishMatches.includes(el));
     let set4 = set3.filter((el) => workExpMatches.includes(el));
@@ -195,9 +192,13 @@ const getResultsByFilters = async function (params) {
     let set6 = set5.filter((el) => regionMatches.includes(el));
     let set7 = set6.filter((el) => salaryMatches.includes(el));
     let set8 = set7.filter((el) => workplaceMatches.includes(el));
-    let idealCandiates = set8.filter((el) => cityMatches.includes(el));
+    let result = set8.filter((el) => cityMatches.includes(el)); 
     */
-    
+    let result = techAndToolsMatches;
+
+    console.log("result: " + result);
+
+    students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");
   }
   return students;
 };
@@ -205,5 +206,19 @@ const getResultsByFilters = async function (params) {
 const getMatchesByFilter = async function (filter, sql) {
   let matches = [];
   if (filter !== "" || filter !== null) matches = await connectionPromise(sql, "");
-  return matches.map(a => a.id);
+  return matches.map((a) => a.id);
+};
+
+const formSqlForTechAndTools = function (techAndToolsIds) {
+  let sql = "SELECT id FROM student_details";
+  techAndToolsIds.forEach((tech) => {
+    if ((tech = techAndToolsIds[0])) {
+      sql = `SELECT id FROM student_details WHERE student_details.technologies_and_tools LIKE '%${tech};%'`;
+    } else {
+      sql += `OR LIKE '%${tech};%'`;
+    }
+  });
+
+  console.log("formed sql: " + sql);
+  return sql;
 };
