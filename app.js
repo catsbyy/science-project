@@ -118,69 +118,73 @@ const getResultsByFilters = async function (params) {
 
     // основні параметри
     // співпадіння по посаді
-    let positionMatches = getMatchesByFilter(
+    let positionMatches = await getMatchesByFilter(
       params.studentPosition,
-      `SELECT * FROM student_details WHERE student_details.position_id = "${params.studentPosition}"`
+      `SELECT id FROM student_details WHERE student_details.position_id = "${params.studentPosition}"`
     );
 
     // співпадіння по області роботи
-    let workAreaMatches = getMatchesByFilter(
+    let workAreaMatches = await getMatchesByFilter(
       params.studentWorkArea,
-      `SELECT * FROM student_details WHERE student_details.work_area_id = "${params.studentWorkArea}"`
+      `SELECT id FROM student_details WHERE student_details.work_area_id = "${params.studentWorkArea}"`
     );
 
     // співпадіння по досвіду роботи
-    let workExpMatches = getMatchesByFilter(
+    let workExpMatches = await getMatchesByFilter(
       params.studentWorkExp,
-      `SELECT * FROM student_details WHERE student_details.work_experience_id = "${params.studentWorkExp}"`
+      `SELECT id FROM student_details WHERE student_details.work_experience_id = "${params.studentWorkExp}"`
     );
 
     // співпадіння по технологіям - найголовніше
-    let techAndToolsMatches = getMatchesByFilter(
+    let techAndToolsMatches = await getMatchesByFilter(
       techAndToolsIds,
-      `SELECT * FROM student_details WHERE student_details.technologies_and_tools = "${techAndToolsIds}"`
+      `SELECT id FROM student_details WHERE student_details.technologies_and_tools = "${techAndToolsIds}"`
     );
 
     // співпадіння по англійській
-    let englishMatches = getMatchesByFilter(
+    let englishMatches = await getMatchesByFilter(
       params.studentEnglish,
-      `SELECT * FROM student_details WHERE student_details.english_level_id = "${params.studentEnglish}"`
+      `SELECT id FROM student_details WHERE student_details.english_level_id = "${params.studentEnglish}"`
     );
 
     // співпадіння по освіті
-    let educationMatches = getMatchesByFilter(
+    let educationMatches = await getMatchesByFilter(
       params.studentEducation,
-      `SELECT * FROM student_details WHERE student_details.education_level_id = "${params.studentEducation}"`
+      `SELECT id FROM student_details WHERE student_details.education_level_id = "${params.studentEducation}"`
     );
 
     // додаткові параметри
     // співпадіння по області
-    let regionMatches = getMatchesByFilter(
+    let regionMatches = await getMatchesByFilter(
       params.studentRegion,
-      `SELECT * FROM student_details WHERE student_details.region_id = "${params.studentRegion}"`
+      `SELECT id FROM student_details WHERE student_details.region_id = "${params.studentRegion}"`
     );
 
     // співпадіння по місту
-    let cityMatches = getMatchesByFilter(
+    let cityMatches = await getMatchesByFilter(
       params.studentCity,
-      `SELECT * FROM student_details WHERE student_details.city = "${params.studentCity}"`
+      `SELECT id FROM student_details WHERE student_details.city = "${params.studentCity}"`
     );
 
     // співпадіння по місцю роботи
-    let workplaceMatches = getMatchesByFilter(
+    let workplaceMatches = await getMatchesByFilter(
       params.studentWorkplace,
-      `SELECT * FROM student_details WHERE student_details.workplace_id = "${params.studentWorkplace}"`
+      `SELECT id FROM student_details WHERE student_details.workplace_id = "${params.studentWorkplace}"`
     );
 
     // співпадіння по заробітній платі
-    let salaryMatches = getMatchesByFilter(
+    let salaryMatches = await getMatchesByFilter(
       params.studentSalary,
-      `SELECT * FROM student_details WHERE student_details.salary_id = "${params.studentSalary}"`
+      `SELECT id FROM student_details WHERE student_details.salary_id = "${params.studentSalary}"`
     );
 
     // перетини результатів - пошук ідеальних кандидатів
 
-    students = workAreaMatches;
+    result = (workExpMatches.filter((el) => positionMatches.includes(el))).toString();
+
+    console.log(result);
+
+    students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");;
     /*
     let set1 = techAndToolsMatches.filter((el) => workAreaMatches.includes(el));
     
@@ -201,5 +205,5 @@ const getResultsByFilters = async function (params) {
 const getMatchesByFilter = async function (filter, sql) {
   let matches = [];
   if (filter !== "" || filter !== null) matches = await connectionPromise(sql, "");
-  return matches;
+  return matches.map(a => a.id);
 };
