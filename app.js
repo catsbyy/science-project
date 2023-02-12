@@ -52,8 +52,17 @@ app.get("/server", async (req, res) => {
 });
 
 app.get("/get-results", async (req, res) => {
-  console.log(req.query);
-  const students = await getResultsByFilters(req.query);
+  //console.log(req.query);
+  const students = await connectionPromise(
+    `SELECT student_details.*,
+  (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
+     FROM student_technology_tool
+    WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
+FROM student_details WHERE position_id = ${req.query.studentPosition}`,
+    ""
+  );
+  //console.log(students);
+  await getResultsByFilters(req.query);
   //`SELECT * FROM student_details`;
 
   // функция возвращает готовый список студентов, поэтому удали sql запрос ниже!
@@ -64,7 +73,12 @@ app.get("/get-results", async (req, res) => {
 });
 
 app.get("/get-student-details/:id", async (req, res) => {
-  const studentSql = `SELECT * FROM student_details WHERE student_details.id = ${req.params.id}`;
+  const studentSql = `SELECT student_details.*,
+  (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
+     FROM student_technology_tool
+    WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
+FROM student_details WHERE id = ${req.params.id}`;
+
   const student = await connectionPromise(studentSql, "");
 
   res.json({
@@ -105,8 +119,9 @@ const getResultsByFilters = async function (params) {
   const defaultValue = await connectionPromise(`SELECT * FROM student_details`, "");
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
-    let techAndToolsIds = "";
+    let techAndToolsIds;
 
+    console.log("techs: ", params.studentTechAndTools);
     if (
       params.studentTechAndTools !== "" &&
       params.studentTechAndTools !== null &&
@@ -119,8 +134,10 @@ const getResultsByFilters = async function (params) {
         })
         .map(Number);
     }
+    console.log("transformed techs: ", techAndToolsIds);
+    console.log("transformed techs in string: ", techAndToolsIds.toString());
 
-    console.log(techAndToolsIds);
+    //console.log(techAndToolsIds);
 
     // основні параметри
     // співпадіння по посаді
@@ -142,7 +159,10 @@ const getResultsByFilters = async function (params) {
     );
 
     // співпадіння по технологіям - найголовніше
-    let techAndToolsMatches = await getMatchesByFilter(techAndToolsIds, formSqlForTechAndTools(techAndToolsIds));
+    let techAndToolsMatches = await getMatchesByFilter(
+      techAndToolsIds,
+      `SELECT student_id FROM student_technology_tool WHERE student_technology_tool.technology_tool_id IN (${techAndToolsIds.toString()})`
+    );
 
     // співпадіння по англійській
     let englishMatches = await getMatchesByFilter(
@@ -198,7 +218,7 @@ const getResultsByFilters = async function (params) {
 
     console.log("result: " + result);
 
-    students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");
+    //students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");
   }
   return students;
 };
@@ -211,11 +231,14 @@ const getMatchesByFilter = async function (filter, sql) {
 
 const formSqlForTechAndTools = function (techAndToolsIds) {
   let sql = "SELECT id FROM student_details";
+
   techAndToolsIds.forEach((tech) => {
-    if ((tech = techAndToolsIds[0])) {
-      sql = `SELECT id FROM student_details WHERE student_details.technologies_and_tools LIKE '%${tech};%'`;
+    if (tech == techAndToolsIds[0]) {
+      console.log("if" + tech);
+      sql = `SELECT id FROM student_details WHERE student_details.technologies_and_tools LIKE '% ${tech};%'`;
     } else {
-      sql += `OR LIKE '%${tech};%'`;
+      console.log("else" + tech);
+      sql += ` OR student_details.technologies_and_tools LIKE '% ${tech};%'`;
     }
   });
 
