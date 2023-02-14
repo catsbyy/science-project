@@ -117,7 +117,14 @@ app.use(function (req, res, next) {
 
 const getResultsByFilters = async function (params) {
   let students = [];
-  const defaultValue = await connectionPromise(`SELECT * FROM student_details`, "");
+  const defaultValue = await connectionPromise(
+    `SELECT student_details.*,
+  (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
+     FROM student_technology_tool
+    WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
+FROM student_details`,
+    ""
+  );
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
     let techAndToolsIds = [];
@@ -207,10 +214,7 @@ const getResultsByFilters = async function (params) {
         workplaceSql = `SELECT id FROM student_details`;
         break;
     }
-    let workplaceMatches = await getMatchesByFilter(
-      params.studentWorkplace,
-      workplaceSql
-    );
+    let workplaceMatches = await getMatchesByFilter(params.studentWorkplace, workplaceSql);
 
     // співпадіння по заробітній платі
     let salaryMatches = await getMatchesByFilter(
@@ -228,7 +232,7 @@ const getResultsByFilters = async function (params) {
     console.log("cityMatches: " + cityMatches);
     console.log("workplaceMatches: " + workplaceMatches);
     console.log("salaryMatches: " + salaryMatches);
-/*
+    /*
     let set1 = techAndToolsMatches.filter((el) => positionMatches.includes(el));
     let result = set1;
      */
@@ -240,12 +244,20 @@ const getResultsByFilters = async function (params) {
     let set6 = set5.filter((el) => regionMatches.includes(el));
     let set7 = set6.filter((el) => salaryMatches.includes(el));
     let set8 = set7.filter((el) => workplaceMatches.includes(el));
-    let result = set8.filter((el) => cityMatches.includes(el)); 
-   
+    let result = set8.filter((el) => cityMatches.includes(el));
 
     console.log("result: " + result);
 
-    students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");
+    if (result.length) {
+      result = result;
+    } else {
+      result = [...new Set([...result, ...set1])];
+    }
+    students = await connectionPromise(`SELECT student_details.*,
+    (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
+       FROM student_technology_tool
+      WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
+  FROM student_details WHERE id IN (${result})`);
   }
   return students;
 };
