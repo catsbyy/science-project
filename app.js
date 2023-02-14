@@ -18,7 +18,7 @@ const connection = mysql.createConnection({
   password: "DifficultPassw12",
 });
 
-const connectionPromise = (url, data) =>
+const connectionPromise = async (url, data) =>
   new Promise((resolve, reject) => {
     connection.query(url, data, function (err, results, fields) {
       if (err) {
@@ -53,6 +53,7 @@ app.get("/server", async (req, res) => {
 
 app.get("/get-results", async (req, res) => {
   //console.log(req.query);
+  /* 
   const students = await connectionPromise(
     `SELECT student_details.*,
   (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
@@ -60,9 +61,9 @@ app.get("/get-results", async (req, res) => {
     WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
 FROM student_details WHERE position_id = ${req.query.studentPosition}`,
     ""
-  );
+  ); */
   //console.log(students);
-  await getResultsByFilters(req.query);
+  const students = await getResultsByFilters(req.query);
   //`SELECT * FROM student_details`;
 
   // функция возвращает готовый список студентов, поэтому удали sql запрос ниже!
@@ -119,9 +120,9 @@ const getResultsByFilters = async function (params) {
   const defaultValue = await connectionPromise(`SELECT * FROM student_details`, "");
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
-    let techAndToolsIds;
+    let techAndToolsIds = [];
 
-    console.log("techs: ", params.studentTechAndTools);
+    //console.log("techs: ", params.studentTechAndTools);
     if (
       params.studentTechAndTools !== "" &&
       params.studentTechAndTools !== null &&
@@ -133,9 +134,9 @@ const getResultsByFilters = async function (params) {
           return el != "";
         })
         .map(Number);
+      //console.log("transformed techs: ", techAndToolsIds);
+      //console.log("transformed techs in string: ", techAndToolsIds.toString());
     }
-    console.log("transformed techs: ", techAndToolsIds);
-    console.log("transformed techs in string: ", techAndToolsIds.toString());
 
     //console.log(techAndToolsIds);
 
@@ -147,7 +148,7 @@ const getResultsByFilters = async function (params) {
     );
 
     // співпадіння по області роботи
-    let workAreaMatches = await getMatchesByFilter(
+    const workAreaMatches = await getMatchesByFilter(
       params.studentWorkArea,
       `SELECT id FROM student_details WHERE student_details.work_area_id = "${params.studentWorkArea}"`
     );
@@ -159,10 +160,14 @@ const getResultsByFilters = async function (params) {
     );
 
     // співпадіння по технологіям - найголовніше
-    let techAndToolsMatches = await getMatchesByFilter(
-      techAndToolsIds,
-      `SELECT student_id FROM student_technology_tool WHERE student_technology_tool.technology_tool_id IN (${techAndToolsIds.toString()})`
-    );
+    console.log("tools right before calling db: " + techAndToolsIds);
+    let techAndToolsMatches = [];
+    if (Array.isArray(techAndToolsIds) && techAndToolsIds.length) {
+      techAndToolsMatches = await getMatchesByFilter(
+        techAndToolsIds,
+        `SELECT student_id FROM student_technology_tool WHERE student_technology_tool.technology_tool_id IN (${techAndToolsIds.toString()})`
+      );
+    }
 
     // співпадіння по англійській
     let englishMatches = await getMatchesByFilter(
@@ -190,9 +195,21 @@ const getResultsByFilters = async function (params) {
     );
 
     // співпадіння по місцю роботи
+    let workplaceSql = "";
+    switch (params.studentWorkplace) {
+      case "1":
+      case "2":
+        workplaceSql = `SELECT id FROM student_details WHERE student_details.workplace_id = "${params.studentWorkplace}"`;
+      case "3":
+        workplaceSql = `SELECT id FROM student_details`;
+        break;
+      default:
+        workplaceSql = `SELECT id FROM student_details`;
+        break;
+    }
     let workplaceMatches = await getMatchesByFilter(
       params.studentWorkplace,
-      `SELECT id FROM student_details WHERE student_details.workplace_id = "${params.studentWorkplace}"`
+      workplaceSql
     );
 
     // співпадіння по заробітній платі
@@ -202,8 +219,19 @@ const getResultsByFilters = async function (params) {
     );
 
     // перетини результатів - пошук кандидатів
-
-    /*
+    console.log("workArea: " + workAreaMatches);
+    console.log("workExpMatches: " + workExpMatches);
+    console.log("techAndToolsMatches: " + techAndToolsMatches);
+    console.log("englishMatches: " + englishMatches);
+    console.log("educationMatches: " + educationMatches);
+    console.log("regionMatches: " + regionMatches);
+    console.log("cityMatches: " + cityMatches);
+    console.log("workplaceMatches: " + workplaceMatches);
+    console.log("salaryMatches: " + salaryMatches);
+/*
+    let set1 = techAndToolsMatches.filter((el) => positionMatches.includes(el));
+    let result = set1;
+     */
     let set1 = techAndToolsMatches.filter((el) => workAreaMatches.includes(el));
     let set2 = set1.filter((el) => positionMatches.includes(el));
     let set3 = set2.filter((el) => englishMatches.includes(el));
@@ -213,35 +241,20 @@ const getResultsByFilters = async function (params) {
     let set7 = set6.filter((el) => salaryMatches.includes(el));
     let set8 = set7.filter((el) => workplaceMatches.includes(el));
     let result = set8.filter((el) => cityMatches.includes(el)); 
-    */
-    let result = techAndToolsMatches;
+   
 
     console.log("result: " + result);
 
-    //students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");
+    students = await connectionPromise(`SELECT * FROM student_details WHERE student_details.id IN (${result})`, "");
   }
   return students;
 };
 
 const getMatchesByFilter = async function (filter, sql) {
   let matches = [];
-  if (filter !== "" || filter !== null) matches = await connectionPromise(sql, "");
-  return matches.map((a) => a.id);
-};
+  if (filter !== "" || filter !== null || filter !== undefined) matches = await connectionPromise(sql, "");
+  console.log(sql + ": " + matches.map((a) => a.id));
+  if (sql.includes("student_technology_tool")) console.log("special for tools: " + matches.map((a) => a.student_id));
 
-const formSqlForTechAndTools = function (techAndToolsIds) {
-  let sql = "SELECT id FROM student_details";
-
-  techAndToolsIds.forEach((tech) => {
-    if (tech == techAndToolsIds[0]) {
-      console.log("if" + tech);
-      sql = `SELECT id FROM student_details WHERE student_details.technologies_and_tools LIKE '% ${tech};%'`;
-    } else {
-      console.log("else" + tech);
-      sql += ` OR student_details.technologies_and_tools LIKE '% ${tech};%'`;
-    }
-  });
-
-  console.log("formed sql: " + sql);
-  return sql;
+  return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
 };
