@@ -35,7 +35,7 @@ const connectionPromise = async (url, data) =>
 
 exports.connection = connectionPromise;
 
-// тестування підключення
+// підключення
 connection.connect(function (err) {
   if (err) {
     return console.error("Помилка: " + err.message);
@@ -54,21 +54,7 @@ app.get("/server", async (req, res) => {
 });
 
 app.get("/get-results", async (req, res) => {
-  //console.log(req.query);
-  /* 
-  const students = await connectionPromise(
-    `SELECT student_details.*,
-  (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
-     FROM student_technology_tool
-    WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
-FROM student_details WHERE position_id = ${req.query.studentPosition}`,
-    ""
-  ); */
-  //console.log(students);
   const students = await getResultsByFilters(req.query);
-  //`SELECT * FROM student_details`;
-
-  // функция возвращает готовый список студентов, поэтому удали sql запрос ниже!
 
   res.json({
     students: students,
@@ -119,11 +105,7 @@ const getResultsByFilters = async function (params) {
           return el != "";
         })
         .map(Number);
-      //console.log("transformed techs: ", techAndToolsIds);
-      //console.log("transformed techs in string: ", techAndToolsIds.toString());
     }
-
-    //console.log(techAndToolsIds);
 
     // основні параметри
     // співпадіння по посаді
