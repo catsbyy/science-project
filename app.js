@@ -1,9 +1,13 @@
 const mysql = require("mysql");
 const express = require("express");
 const cors = require("cors");
-const { get } = require("./routes/studentRouter");
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+const db = require("./models/db.js");
+const dbHelper = new db();
+
+console.log(dbHelper.sqlRegions);
 
 app.use(cors());
 
@@ -41,10 +45,8 @@ connection.connect(function (err) {
 });
 
 app.get("/server", async (req, res) => {
-  const sqlRegions = "SELECT * FROM region";
-  const regions = await connectionPromise(sqlRegions, "");
-  const sqlTechAndTools = "SELECT * FROM technologies_and_tools";
-  const techAndTools = await connectionPromise(sqlTechAndTools, "");
+  const regions = await connectionPromise(dbHelper.sqlGetAllRegions, "");
+  const techAndTools = await connectionPromise(dbHelper.sqlGetAllTechAndTools, "");
   res.json({
     regions: regions,
     techAndTools: techAndTools,
@@ -74,13 +76,7 @@ FROM student_details WHERE position_id = ${req.query.studentPosition}`,
 });
 
 app.get("/get-student-details/:id", async (req, res) => {
-  const studentSql = `SELECT student_details.*,
-  (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
-     FROM student_technology_tool
-    WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
-FROM student_details WHERE id = ${req.params.id}`;
-
-  const student = await connectionPromise(studentSql, "");
+  const student = await connectionPromise(dbHelper.getSqlOneStudent(req.params.id), "");
 
   res.json({
     student: student,
@@ -96,20 +92,9 @@ FROM student_details WHERE id = ${req.params.id}`;
 // });
 
 app.use(express.json());
-const userRouter = require("./routes/userRouter.js");
-const homeRouter = require("./routes/homeRouter.js");
-const studentRouter = require("./routes/studentRouter.js");
-const businessRouter = require("./routes/businessRouter.js");
-const successfulRegRouter = require("./routes/successfulRegRouter.js");
 
 app.set("view engine", "hbs");
 app.use(express.urlencoded({ extended: true }));
-
-app.use("/users", userRouter);
-app.use("/students", studentRouter);
-app.use("/successful-registration", successfulRegRouter);
-app.use("/business", businessRouter);
-app.use("/", homeRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
@@ -117,14 +102,7 @@ app.use(function (req, res, next) {
 
 const getResultsByFilters = async function (params) {
   let students = [];
-  const defaultValue = await connectionPromise(
-    `SELECT student_details.*,
-  (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
-     FROM student_technology_tool
-    WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
-FROM student_details`,
-    ""
-  );
+  const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
     let techAndToolsIds = [];
@@ -151,19 +129,19 @@ FROM student_details`,
     // співпадіння по посаді
     let positionMatches = await getMatchesByFilter(
       params.studentPosition,
-      `SELECT id FROM student_details WHERE student_details.position_id = "${params.studentPosition}"`
+      dbHelper.getSqlStudentIdsByPosition(params.studentPosition)
     );
 
     // співпадіння по області роботи
     const workAreaMatches = await getMatchesByFilter(
       params.studentWorkArea,
-      `SELECT id FROM student_details WHERE student_details.work_area_id = "${params.studentWorkArea}"`
+      dbHelper.getSqlStudentIdsByWorkArea(params.studentWorkArea)
     );
 
     // співпадіння по досвіду роботи
     let workExpMatches = await getMatchesByFilter(
       params.studentWorkExp,
-      `SELECT id FROM student_details WHERE student_details.work_experience_id = "${params.studentWorkExp}"`
+      getSqlStudentIdsByWorkExp(params.studentWorkExp)
     );
 
     // співпадіння по технологіям - найголовніше
@@ -172,46 +150,43 @@ FROM student_details`,
     if (Array.isArray(techAndToolsIds) && techAndToolsIds.length) {
       techAndToolsMatches = await getMatchesByFilter(
         techAndToolsIds,
-        `SELECT student_id FROM student_technology_tool WHERE student_technology_tool.technology_tool_id IN (${techAndToolsIds.toString()})`
+        dbHelper.getSqlStudentIdsByTechAndTools(techAndToolsIds.toString())
       );
     }
 
     // співпадіння по англійській
     let englishMatches = await getMatchesByFilter(
       params.studentEnglish,
-      `SELECT id FROM student_details WHERE student_details.english_level_id = "${params.studentEnglish}"`
+      dbHelper.getSqlStudentIdsByEnglish(params.studentEnglish)
     );
 
     // співпадіння по освіті
     let educationMatches = await getMatchesByFilter(
       params.studentEducation,
-      `SELECT id FROM student_details WHERE student_details.education_level_id = "${params.studentEducation}"`
+      dbHelper.getSqlStudentIdsByEducation(params.studentEducation)
     );
 
     // додаткові параметри
     // співпадіння по області
     let regionMatches = await getMatchesByFilter(
       params.studentRegion,
-      `SELECT id FROM student_details WHERE student_details.region_id = "${params.studentRegion}"`
+      dbHelper.getSqlStudentIdsByRegion(params.studentRegion)
     );
 
     // співпадіння по місту
-    let cityMatches = await getMatchesByFilter(
-      params.studentCity,
-      `SELECT id FROM student_details WHERE student_details.city = "${params.studentCity}"`
-    );
+    let cityMatches = await getMatchesByFilter(params.studentCity, dbHelper.getSqlStudentIdsByCity(params.studentCity));
 
     // співпадіння по місцю роботи
     let workplaceSql = "";
     switch (params.studentWorkplace) {
       case "1":
       case "2":
-        workplaceSql = `SELECT id FROM student_details WHERE student_details.workplace_id = "${params.studentWorkplace}"`;
+        workplaceSql = dbHelper.getSqlStudentIdsByWorkplace(params.studentWorkplace);
       case "3":
-        workplaceSql = `SELECT id FROM student_details`;
+        workplaceSql = dbHelper.sqlGetAllStudentIds;
         break;
       default:
-        workplaceSql = `SELECT id FROM student_details`;
+        workplaceSql = dbHelper.sqlGetAllStudentIds;
         break;
     }
     let workplaceMatches = await getMatchesByFilter(params.studentWorkplace, workplaceSql);
@@ -219,7 +194,7 @@ FROM student_details`,
     // співпадіння по заробітній платі
     let salaryMatches = await getMatchesByFilter(
       params.studentSalary,
-      `SELECT id FROM student_details WHERE student_details.salary_id = "${params.studentSalary}"`
+      dbHelper.getSqlStudentIdsBySalary(params.studentSalary)
     );
 
     // перетини результатів - пошук кандидатів
@@ -253,11 +228,7 @@ FROM student_details`,
     } else {
       result = [...new Set([...result, ...set1])];
     }
-    students = await connectionPromise(`SELECT student_details.*,
-    (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
-       FROM student_technology_tool
-      WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
-  FROM student_details WHERE id IN (${result})`);
+    students = await connectionPromise(dbHelper.getSqlMultipleStudents(result), "");
   }
   return students;
 };
