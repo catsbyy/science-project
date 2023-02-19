@@ -1,12 +1,10 @@
 const connection = require("../app.js").connection;
 
 exports.business = async function (request, response) {
-  const sqlRegions = "SELECT * FROM region";
-    const regions = await connection(sqlRegions, "");
     const sqlTechAndTools = "SELECT * FROM technologies_and_tools";
     const techAndTools = await connection(sqlTechAndTools, "");
     console.log(techAndTools);
-  response.render("business.hbs", {regions, techAndTools});
+  //response.render("business.hbs", {regions, techAndTools});
 };
 
 exports.postBusiness = async function (request, response) {

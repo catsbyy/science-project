@@ -76,7 +76,7 @@ exports.postStudents = async function (request, response) {
 };
 
 exports.successfulRegistration = function (request, resoinse) {
-  response.render("successful_registration.hbs");
+  //response.render("successful_registration.hbs");
 };
 
 // отримання усіх кандидатів
