@@ -79,7 +79,6 @@ app.get("/get-student-details/:id", async (req, res) => {
 
 app.use(express.json());
 
-app.set("view engine", "hbs");
 app.use(express.urlencoded({ extended: true }));
 
 app.use(function (req, res, next) {
