@@ -2,11 +2,6 @@ const app = require("../app.js");
 const db = require("../models/db.js");
 const dbHelper = new db();
 
-exports.students = async function (request, response) {
-  const regions = await connection(dbHelper.sqlGetAllRegions, "");
-  const techAndTools = await connection(dbHelper.sqlGetAllTechAndTools, "");
-};
-
 exports.postStudents = async function (request, response) {
   const student = [
     request.body.studentName,
@@ -59,4 +54,3 @@ exports.postStudents = async function (request, response) {
   response.send("OK");
 };
 
-exports.successfulRegistration = function (request, resoinse) {};

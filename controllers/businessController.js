@@ -2,11 +2,6 @@ const connection = require("../app.js").connection;
 const db = require("../models/db.js");
 const dbHelper = new db();
 
-exports.business = async function (request, response) {
-    const techAndTools = await connection(dbHelper.sqlGetAllTechAndTools, "");
-    console.log(techAndTools);
-};
-
 exports.postBusiness = async function (request, response) {
 
   const student = [
