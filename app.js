@@ -87,6 +87,7 @@ app.use(function (req, res, next) {
 
 const getResultsByFilters = async function (params) {
   let students = [];
+  console.log("tak, eto shto takoe?" + params);
   const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
@@ -101,7 +102,7 @@ const getResultsByFilters = async function (params) {
       techAndToolsIds = params.studentTechAndTools
         .split(";")
         .filter(function (el) {
-          return el != "";
+          return el !== "";
         })
         .map(Number);
     }
@@ -122,7 +123,7 @@ const getResultsByFilters = async function (params) {
     // співпадіння по досвіду роботи
     let workExpMatches = await getMatchesByFilter(
       params.studentWorkExp,
-      getSqlStudentIdsByWorkExp(params.studentWorkExp)
+      dbHelper.getSqlStudentIdsByWorkExp(params.studentWorkExp)
     );
 
     // співпадіння по технологіям - найголовніше
@@ -192,6 +193,7 @@ const getResultsByFilters = async function (params) {
     let set1 = techAndToolsMatches.filter((el) => positionMatches.includes(el));
     let result = set1;
      */
+      
     let set1 = techAndToolsMatches.filter((el) => workAreaMatches.includes(el));
     let set2 = set1.filter((el) => positionMatches.includes(el));
     let set3 = set2.filter((el) => englishMatches.includes(el));
@@ -209,16 +211,23 @@ const getResultsByFilters = async function (params) {
     } else {
       result = [...new Set([...result, ...set1])];
     }
-    students = await connectionPromise(dbHelper.getSqlMultipleStudents(result), "");
+    students = result !== null ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
   }
   return students;
 };
 
 const getMatchesByFilter = async function (filter, sql) {
+  console.log("filter: " + filter);
+  console.log("sql: " + sql);
   let matches = [];
-  if (filter !== "" || filter !== null || filter !== undefined) matches = await connectionPromise(sql, "");
-  console.log(sql + ": " + matches.map((a) => a.id));
-  if (sql.includes("student_technology_tool")) console.log("special for tools: " + matches.map((a) => a.student_id));
+  if (filter === "" || filter === null || filter === undefined) {
+    return matches;
+  }
+  else {
+    matches = await connectionPromise(sql, "");
+    return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
+  };
+  //console.log(sql + ": " + matches.map((a) => a.id));
+  //if (sql.includes("student_technology_tool")) console.log("special for tools: " + matches.map((a) => a.student_id));
 
-  return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
 };

@@ -32,19 +32,11 @@ module.exports = class Database {
   }
 
   getSqlStudentIdsByWorkArea(studentWorkArea) {
-    `SELECT id FROM student_details WHERE student_details.work_area_id = "${studentWorkArea}"`;
+    return `SELECT id FROM student_details WHERE student_details.work_area_id = "${studentWorkArea}"`;
   }
 
   getSqlStudentIdsByWorkExp(studentWorkExp) {
     return `SELECT id FROM student_details WHERE student_details.work_experience_id = "${studentWorkExp}"`;
-  }
-
-  getSqlStudentIdsByPosition(studentPosition) {
-    return `SELECT id FROM student_details WHERE student_details.position_id = "${studentPosition}"`;
-  }
-
-  getSqlStudentIdsByPosition(studentPosition) {
-    return `SELECT id FROM student_details WHERE student_details.position_id = "${studentPosition}"`;
   }
 
   getSqlStudentIdsByTechAndTools(techAndToolsIds) {
@@ -57,10 +49,6 @@ module.exports = class Database {
 
   getSqlStudentIdsByWorkplace(studentWorkplace) {
     return `SELECT id FROM student_details WHERE student_details.workplace_id = "${studentWorkplace}"`;
-  }
-
-  getSqlStudentIdsByEducation(studentEducation) {
-    return `SELECT id FROM student_details WHERE student_details.education_level_id = "${studentEducation}"`;
   }
 
   getSqlStudentIdsByRegion(studentRegion) {
