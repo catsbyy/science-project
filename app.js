@@ -211,7 +211,10 @@ const getResultsByFilters = async function (params) {
     } else {
       result = [...new Set([...result, ...set1])];
     }
-    students = result !== null ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
+
+    console.log("result + set1: " + result);
+
+    students = result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
   }
   return students;
 };
