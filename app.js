@@ -179,6 +179,23 @@ const getResultsByFilters = async function (params) {
       dbHelper.getSqlStudentIdsBySalary(params.studentSalary)
     );
 
+    let resultsObj = {
+      position: positionMatches,
+      workArea: workAreaMatches,
+      workExp: workExpMatches,
+      techAndTools: techAndToolsMatches,
+      english: englishMatches,
+      education: educationMatches,
+      region: regionMatches,
+      city: cityMatches,
+      workplace: workplaceMatches,
+      salary: salaryMatches
+    };
+
+    for (const [key, value] of Object.entries(resultsObj)) {
+      console.log(`RESULTOBJ: ${key}: ${value}`);
+    }
+
     // перетини результатів - пошук кандидатів
     console.log("workArea: " + workAreaMatches);
     console.log("workExpMatches: " + workExpMatches);
