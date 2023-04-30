@@ -192,8 +192,17 @@ const getResultsByFilters = async function (params) {
       city: cityMatches
     };
 
+    let resultSet = resultsObj.techAndTools;
+    let keys = Object.keys(resultsObj);
     for (const [key, value] of Object.entries(resultsObj)) {
       console.log(`RESULTOBJ: ${key}: ${value}`);
+
+      let nextIndex = keys.indexOf(key) +1;
+      let nextItem = keys[nextIndex];
+      console.log("next item: " + nextItem);
+
+      resultSet = getMatchesIntersection(resultSet,resultsObj.nextItem);
+
     }
 
     // перетини результатів - пошук кандидатів
