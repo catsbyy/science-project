@@ -180,16 +180,16 @@ const getResultsByFilters = async function (params) {
     );
 
     let resultsObj = {
-      position: positionMatches,
-      workArea: workAreaMatches,
-      workExp: workExpMatches,
       techAndTools: techAndToolsMatches,
+      workArea: workAreaMatches,
+      position: positionMatches,
       english: englishMatches,
+      workExp: workExpMatches,
       education: educationMatches,
+      salary: salaryMatches,
       region: regionMatches,
-      city: cityMatches,
       workplace: workplaceMatches,
-      salary: salaryMatches
+      city: cityMatches
     };
 
     for (const [key, value] of Object.entries(resultsObj)) {
