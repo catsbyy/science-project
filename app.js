@@ -188,21 +188,17 @@ const getResultsByFilters = async function (params) {
     console.log("regionMatches: " + regionMatches);
     console.log("cityMatches: " + cityMatches);
     console.log("workplaceMatches: " + workplaceMatches);
-    console.log("salaryMatches: " + salaryMatches);
-    /*
-    let set1 = techAndToolsMatches.filter((el) => positionMatches.includes(el));
-    let result = set1;
-     */
-      
-    let set1 = techAndToolsMatches.filter((el) => workAreaMatches.includes(el));
-    let set2 = set1.filter((el) => positionMatches.includes(el));
-    let set3 = set2.filter((el) => englishMatches.includes(el));
-    let set4 = set3.filter((el) => workExpMatches.includes(el));
-    let set5 = set4.filter((el) => educationMatches.includes(el));
-    let set6 = set5.filter((el) => regionMatches.includes(el));
-    let set7 = set6.filter((el) => salaryMatches.includes(el));
-    let set8 = set7.filter((el) => workplaceMatches.includes(el));
-    let result = set8.filter((el) => cityMatches.includes(el));
+    console.log("salaryMatches: " + salaryMatches); 
+
+    let set1 = getMatchesIntersection(techAndToolsMatches, workAreaMatches);
+    let set2 = getMatchesIntersection(set1, positionMatches);
+    let set3 = getMatchesIntersection(set2, englishMatches);
+    let set4 = getMatchesIntersection(set3, workExpMatches);
+    let set5 = getMatchesIntersection(set4, educationMatches);
+    let set6 = getMatchesIntersection(set5, regionMatches);
+    let set7 = getMatchesIntersection(set6, salaryMatches);
+    let set8 = getMatchesIntersection(set7, workplaceMatches);
+    let result = getMatchesIntersection(set8, cityMatches);
 
     console.log("result: " + result);
 
@@ -214,7 +210,8 @@ const getResultsByFilters = async function (params) {
 
     console.log("result + set1: " + result);
 
-    students = result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
+    students =
+      result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
   }
   return students;
 };
@@ -225,12 +222,14 @@ const getMatchesByFilter = async function (filter, sql) {
   let matches = [];
   if (filter === "" || filter === null || filter === undefined) {
     return matches;
-  }
-  else {
+  } else {
     matches = await connectionPromise(sql, "");
     return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
-  };
+  }
   //console.log(sql + ": " + matches.map((a) => a.id));
   //if (sql.includes("student_technology_tool")) console.log("special for tools: " + matches.map((a) => a.student_id));
+};
 
+const getMatchesIntersection = function (a, b) {
+  return a.filter((el) => b.includes(el));
 };
