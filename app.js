@@ -5,7 +5,9 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 
 const db = require("./models/db.js");
+//const filter = require("./models/filter.js");
 const dbHelper = new db();
+//const filter = new filter();
 
 console.log(dbHelper.sqlRegions);
 
@@ -189,7 +191,7 @@ const getResultsByFilters = async function (params) {
       salary: salaryMatches,
       region: regionMatches,
       workplace: workplaceMatches,
-      city: cityMatches
+      city: cityMatches,
     };
 
     let resultSet = resultsObj.techAndTools;
@@ -197,13 +199,16 @@ const getResultsByFilters = async function (params) {
     for (const [key, value] of Object.entries(resultsObj)) {
       console.log(`RESULTOBJ: ${key}: ${value}`);
 
-      let nextIndex = keys.indexOf(key) +1;
+      let nextIndex = keys.indexOf(key) + 1;
       let nextItem = keys[nextIndex];
-      console.log("next item: " + nextItem);
 
-      resultSet = getMatchesIntersection(resultSet,resultsObj.nextItem);
-
+      //console.log("nextItem: " + nextItem);
+      //console.log("next item: " + nextItem);
+      //console.log(key + " ---- resultSet: " + resultSet + " nextItem: " + resultsObj[nextItem]);
+      resultSet = getMatchesIntersection(resultSet, resultsObj[nextItem]);
     }
+
+    console.log("final result set -------- " + resultSet);
 
     // перетини результатів - пошук кандидатів
     console.log("workArea: " + workAreaMatches);
@@ -214,7 +219,7 @@ const getResultsByFilters = async function (params) {
     console.log("regionMatches: " + regionMatches);
     console.log("cityMatches: " + cityMatches);
     console.log("workplaceMatches: " + workplaceMatches);
-    console.log("salaryMatches: " + salaryMatches); 
+    console.log("salaryMatches: " + salaryMatches);
 
     let set1 = getMatchesIntersection(techAndToolsMatches, workAreaMatches);
     let set2 = getMatchesIntersection(set1, positionMatches);
@@ -224,7 +229,9 @@ const getResultsByFilters = async function (params) {
     let set6 = getMatchesIntersection(set5, regionMatches);
     let set7 = getMatchesIntersection(set6, salaryMatches);
     let set8 = getMatchesIntersection(set7, workplaceMatches);
-    let result = getMatchesIntersection(set8, cityMatches);
+    //let result = getMatchesIntersection(set8, cityMatches);
+
+    let result = resultSet;
 
     console.log("result: " + result);
 
@@ -234,8 +241,6 @@ const getResultsByFilters = async function (params) {
       result = [...new Set([...result, ...set1])];
     }
 
-    console.log("result + set1: " + result);
-
     students =
       result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
   }
@@ -243,8 +248,8 @@ const getResultsByFilters = async function (params) {
 };
 
 const getMatchesByFilter = async function (filter, sql) {
-  console.log("filter: " + filter);
-  console.log("sql: " + sql);
+  //console.log("filter: " + filter);
+  //console.log("sql: " + sql);
   let matches = [];
   if (filter === "" || filter === null || filter === undefined) {
     return matches;
@@ -257,5 +262,32 @@ const getMatchesByFilter = async function (filter, sql) {
 };
 
 const getMatchesIntersection = function (a, b) {
-  return a.filter((el) => b.includes(el));
+  let intersection;
+
+  if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
+    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+      intersection = a.filter((el) => b.includes(el));
+      console.log("it was a and b not nulls " + intersection);
+    } else {
+      intersection = a;
+      console.log("it was a " + intersection);
+    }
+  } else {
+    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+      intersection = b;
+      console.log("it was b " + intersection);
+    } else {
+      intersection = [];
+      console.log("both are null " + intersection);
+    }
+  }
+  return intersection;
+};
+
+const getMatchesUnion = function (a, b) {
+  let union;
+
+  union = [...new Set([...a, ...b])];
+
+  return union;
 };
