@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const express = require("express");
 const cors = require("cors");
+const { get } = require("./routes/studentRouter");
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -71,6 +72,7 @@ app.get("/get-student-details/:id", async (req, res) => {
   });
 });
 
+
 // закриття підключення
 // connection.end(function (err) {
 //   if (err) {
@@ -80,8 +82,12 @@ app.get("/get-student-details/:id", async (req, res) => {
 // });
 
 app.use(express.json());
-
+const studentRouter = require("./routes/studentRouter.js");
+//const businessRouter = require("./routes/businessRouter.js");
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/students", studentRouter);
+//app.use("/business", businessRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
@@ -196,6 +202,8 @@ const getResultsByFilters = async function (params) {
 
     let resultSet = resultsObj.techAndTools;
     let keys = Object.keys(resultsObj);
+
+    // пошук ідеальних кандидатів
     for (const [key, value] of Object.entries(resultsObj)) {
       console.log(`RESULTOBJ: ${key}: ${value}`);
 
@@ -221,6 +229,7 @@ const getResultsByFilters = async function (params) {
     console.log("workplaceMatches: " + workplaceMatches);
     console.log("salaryMatches: " + salaryMatches);
 
+    /*
     let set1 = getMatchesIntersection(techAndToolsMatches, workAreaMatches);
     let set2 = getMatchesIntersection(set1, positionMatches);
     let set3 = getMatchesIntersection(set2, englishMatches);
@@ -229,6 +238,8 @@ const getResultsByFilters = async function (params) {
     let set6 = getMatchesIntersection(set5, regionMatches);
     let set7 = getMatchesIntersection(set6, salaryMatches);
     let set8 = getMatchesIntersection(set7, workplaceMatches);
+    */
+
     //let result = getMatchesIntersection(set8, cityMatches);
 
     let result = resultSet;
@@ -237,8 +248,13 @@ const getResultsByFilters = async function (params) {
 
     if (result.length) {
       result = result;
+      result = getAdditionalResults(result, resultsObj);
     } else {
-      result = [...new Set([...result, ...set1])];
+      try {
+        result = getAdditionalResults(result, resultsObj);
+      } catch {
+        console.log("default ---------- " + defaultValue);
+      }
     }
 
     students =
@@ -287,7 +303,45 @@ const getMatchesIntersection = function (a, b) {
 const getMatchesUnion = function (a, b) {
   let union;
 
-  union = [...new Set([...a, ...b])];
+  if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
+    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+      union = [...new Set([...a, ...b])];
+    } else {
+      union = a;
+    }
+  } else {
+    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+      union = b;
+    } else {
+      union = [];
+    }
+  }
+  //union = [...new Set([...a, ...b])];
 
   return union;
 };
+
+const getAdditionalResults = function(currentResult, separateMatchesObj) {
+  let expandedResults = getMatchesUnion(currentResult, separateMatchesObj.techAndTools);
+  
+  let keys = Object.keys(separateMatchesObj);
+
+    // пошук додаткових кандидатів
+    for (const [key, value] of Object.entries(separateMatchesObj)) {
+      if (expandedResults.length < 20){
+        console.log(`RESULTOBJ: ${key}: ${value}`);
+
+        let nextIndex = keys.indexOf(key) + 1;
+        let nextItem = keys[nextIndex];
+  
+        //console.log("nextItem: " + nextItem);
+        //console.log("next item: " + nextItem);
+        
+        expandedResults = getMatchesUnion(expandedResults, separateMatchesObj[nextItem]);
+        //console.log(key + " ---- resultSet: " + expandedResults + " nextItem: " + separateMatchesObj[nextItem]);
+      }
+      else break;
+  }
+  
+  return expandedResults;
+}
