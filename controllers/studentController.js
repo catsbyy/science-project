@@ -1,36 +1,12 @@
 const app = require("../app.js");
 const db = require("../models/db.js");
 const dbHelper = new db();
+const studentObj = require("../models/student.js");
 
 exports.postStudents = async function (request, response) {
-  const student = [
-    request.body.studentName,
-    request.body.studentSurname,
-    request.body.studentPatronymic,
-    request.body.studentDateOfBirth,
-    request.body.studentSummary,
-    request.body.studentProfilePic,
-    request.body.studentRegion,
-    request.body.studentCity,
-    request.body.studentStreet,
-    request.body.studentHouseNum,
-    request.body.studentMobNumber,
-    request.body.studentEmail,
-    request.body.studentLinkedin,
-    request.body.studentGithub,
-    request.body.studentEducation,
-    request.body.studentUniversity,
-    request.body.studentSpecialty,
-    request.body.studentEnglish,
-    request.body.studentPosition,
-    request.body.studentWorkExp,
-    request.body.studentWorkArea,
-    request.body.studentSalary,
-    request.body.studentWorkplace,
-    request.body.studentTechAndTools,
-  ];
+  const student = new studentObj(request);
 
-  await app.connection(dbHelper.sqlInsertStudentDetails, student);
+  await app.connection(dbHelper.sqlInsertStudentDetails, Object.values(student));
 
   const techAndToolsIds = request.body.studentTechAndTools
     .split(";")

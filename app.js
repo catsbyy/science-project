@@ -1,18 +1,14 @@
 const mysql = require("mysql");
 const express = require("express");
 const cors = require("cors");
-const { get } = require("./routes/studentRouter");
 const PORT = process.env.PORT || 3001;
 const app = express();
 
 const db = require("./models/db.js");
-//const filter = require("./models/filter.js");
 const dbHelper = new db();
-//const filter = new filter();
-
-console.log(dbHelper.sqlRegions);
-
 app.use(cors());
+
+//console.log(dbHelper.sqlRegions);
 
 app.listen(PORT, () => {
   console.log(`Server is working on port ${PORT}`);
@@ -83,11 +79,9 @@ app.get("/get-student-details/:id", async (req, res) => {
 
 app.use(express.json());
 const studentRouter = require("./routes/studentRouter.js");
-//const businessRouter = require("./routes/businessRouter.js");
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/students", studentRouter);
-//app.use("/business", businessRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
@@ -101,7 +95,6 @@ const getResultsByFilters = async function (params) {
   else {
     let techAndToolsIds = [];
 
-    //console.log("techs: ", params.studentTechAndTools);
     if (
       params.studentTechAndTools !== "" &&
       params.studentTechAndTools !== null &&
@@ -210,9 +203,6 @@ const getResultsByFilters = async function (params) {
       let nextIndex = keys.indexOf(key) + 1;
       let nextItem = keys[nextIndex];
 
-      //console.log("nextItem: " + nextItem);
-      //console.log("next item: " + nextItem);
-      //console.log(key + " ---- resultSet: " + resultSet + " nextItem: " + resultsObj[nextItem]);
       resultSet = getMatchesIntersection(resultSet, resultsObj[nextItem]);
     }
 
