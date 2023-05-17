@@ -54,7 +54,7 @@ app.get("/server", async (req, res) => {
 
 app.get("/get-results", async (req, res) => {
   const students = await getResultsByFilters(req.query);
-
+ 
   res.json({
     students: students,
   });
@@ -89,7 +89,6 @@ app.use(function (req, res, next) {
 
 const getResultsByFilters = async function (params) {
   let students = [];
-  console.log("tak, eto shto takoe?" + params);
   const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
   if (Object.keys(params).length === 0) students = defaultValue;
   else {
@@ -254,8 +253,6 @@ const getResultsByFilters = async function (params) {
 };
 
 const getMatchesByFilter = async function (filter, sql) {
-  //console.log("filter: " + filter);
-  //console.log("sql: " + sql);
   let matches = [];
   if (filter === "" || filter === null || filter === undefined) {
     return matches;
@@ -263,8 +260,6 @@ const getMatchesByFilter = async function (filter, sql) {
     matches = await connectionPromise(sql, "");
     return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
   }
-  //console.log(sql + ": " + matches.map((a) => a.id));
-  //if (sql.includes("student_technology_tool")) console.log("special for tools: " + matches.map((a) => a.student_id));
 };
 
 const getMatchesIntersection = function (a, b) {
@@ -273,18 +268,14 @@ const getMatchesIntersection = function (a, b) {
   if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
     if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
       intersection = a.filter((el) => b.includes(el));
-      console.log("it was a and b not nulls " + intersection);
     } else {
       intersection = a;
-      console.log("it was a " + intersection);
     }
   } else {
     if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
       intersection = b;
-      console.log("it was b " + intersection);
     } else {
       intersection = [];
-      console.log("both are null " + intersection);
     }
   }
   return intersection;
@@ -306,7 +297,6 @@ const getMatchesUnion = function (a, b) {
       union = [];
     }
   }
-  //union = [...new Set([...a, ...b])];
 
   return union;
 };
