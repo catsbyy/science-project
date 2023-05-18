@@ -8,8 +8,6 @@ const db = require("./models/db.js");
 const dbHelper = new db();
 app.use(cors());
 
-//console.log(dbHelper.sqlRegions);
-
 app.listen(PORT, () => {
   console.log(`Server is working on port ${PORT}`);
 });
@@ -67,15 +65,6 @@ app.get("/get-student-details/:id", async (req, res) => {
     student: student,
   });
 });
-
-
-// закриття підключення
-// connection.end(function (err) {
-//   if (err) {
-//     return console.log("Помилка: " + err.message);
-//   }
-//   console.log("Підключення закрито");
-// });
 
 app.use(express.json());
 const studentRouter = require("./routes/studentRouter.js");
@@ -218,19 +207,6 @@ const getResultsByFilters = async function (params) {
     console.log("workplaceMatches: " + workplaceMatches);
     console.log("salaryMatches: " + salaryMatches);
 
-    /*
-    let set1 = getMatchesIntersection(techAndToolsMatches, workAreaMatches);
-    let set2 = getMatchesIntersection(set1, positionMatches);
-    let set3 = getMatchesIntersection(set2, englishMatches);
-    let set4 = getMatchesIntersection(set3, workExpMatches);
-    let set5 = getMatchesIntersection(set4, educationMatches);
-    let set6 = getMatchesIntersection(set5, regionMatches);
-    let set7 = getMatchesIntersection(set6, salaryMatches);
-    let set8 = getMatchesIntersection(set7, workplaceMatches);
-    */
-
-    //let result = getMatchesIntersection(set8, cityMatches);
-
     let result = resultSet;
 
     console.log("result: " + result);
@@ -313,9 +289,6 @@ const getAdditionalResults = function(currentResult, separateMatchesObj) {
 
         let nextIndex = keys.indexOf(key) + 1;
         let nextItem = keys[nextIndex];
-  
-        //console.log("nextItem: " + nextItem);
-        //console.log("next item: " + nextItem);
         
         expandedResults = getMatchesUnion(expandedResults, separateMatchesObj[nextItem]);
         //console.log(key + " ---- resultSet: " + expandedResults + " nextItem: " + separateMatchesObj[nextItem]);
