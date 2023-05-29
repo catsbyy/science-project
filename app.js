@@ -50,251 +50,256 @@ app.get("/server", async (req, res) => {
   });
 });
 
-app.get("/get-results", async (req, res) => {
-  const students = await getResultsByFilters(req.query);
+// app.get("/get-results", async (req, res) => {
+//   const students = await getResultsByFilters(req.query);
  
-  res.json({
-    students: students,
-  });
-});
+//   res.json({
+//     students: students,
+//   });
+// });
 
-app.get("/get-student-details/:id", async (req, res) => {
-  const student = await connectionPromise(dbHelper.getSqlOneStudent(req.params.id), "");
+// app.get("/get-student-details/:id", async (req, res) => {
+//   const student = await connectionPromise(dbHelper.getSqlOneStudent(req.params.id), "");
 
-  res.json({
-    student: student,
-  });
-});
+//   res.json({
+//     student: student,
+//   });
+// });
 
 app.use(express.json());
 const studentRouter = require("./routes/studentRouter.js");
+const businessRouter = require("./routes/businessRouter.js");
+const infoRouter = require("./routes/infoRouter.js");
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/students", studentRouter);
+app.get("/get-results", businessRouter);
+app.get("/get-student-details/:id", businessRouter);
+app.get("/server", infoRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
 });
 
-const getResultsByFilters = async function (params) {
-  let students = [];
-  const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
-  if (Object.keys(params).length === 0) students = defaultValue;
-  else {
-    let techAndToolsIds = [];
+// const getResultsByFilters = async function (params) {
+//   let students = [];
+//   const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
+//   if (Object.keys(params).length === 0) students = defaultValue;
+//   else {
+//     let techAndToolsIds = [];
 
-    if (
-      params.studentTechAndTools !== "" &&
-      params.studentTechAndTools !== null &&
-      params.studentTechAndTools !== undefined
-    ) {
-      techAndToolsIds = params.studentTechAndTools
-        .split(";")
-        .filter(function (el) {
-          return el !== "";
-        })
-        .map(Number);
-    }
+//     if (
+//       params.studentTechAndTools !== "" &&
+//       params.studentTechAndTools !== null &&
+//       params.studentTechAndTools !== undefined
+//     ) {
+//       techAndToolsIds = params.studentTechAndTools
+//         .split(";")
+//         .filter(function (el) {
+//           return el !== "";
+//         })
+//         .map(Number);
+//     }
 
-    // основні параметри
-    // співпадіння по посаді
-    let positionMatches = await getMatchesByFilter(
-      params.studentPosition,
-      dbHelper.getSqlStudentIdsByPosition(params.studentPosition)
-    );
+//     // основні параметри
+//     // співпадіння по посаді
+//     let positionMatches = await getMatchesByFilter(
+//       params.studentPosition,
+//       dbHelper.getSqlStudentIdsByPosition(params.studentPosition)
+//     );
 
-    // співпадіння по області роботи
-    const workAreaMatches = await getMatchesByFilter(
-      params.studentWorkArea,
-      dbHelper.getSqlStudentIdsByWorkArea(params.studentWorkArea)
-    );
+//     // співпадіння по області роботи
+//     const workAreaMatches = await getMatchesByFilter(
+//       params.studentWorkArea,
+//       dbHelper.getSqlStudentIdsByWorkArea(params.studentWorkArea)
+//     );
 
-    // співпадіння по досвіду роботи
-    let workExpMatches = await getMatchesByFilter(
-      params.studentWorkExp,
-      dbHelper.getSqlStudentIdsByWorkExp(params.studentWorkExp)
-    );
+//     // співпадіння по досвіду роботи
+//     let workExpMatches = await getMatchesByFilter(
+//       params.studentWorkExp,
+//       dbHelper.getSqlStudentIdsByWorkExp(params.studentWorkExp)
+//     );
 
-    // співпадіння по технологіям - найголовніше
-    console.log("tools right before calling db: " + techAndToolsIds);
-    let techAndToolsMatches = [];
-    if (Array.isArray(techAndToolsIds) && techAndToolsIds.length) {
-      techAndToolsMatches = await getMatchesByFilter(
-        techAndToolsIds,
-        dbHelper.getSqlStudentIdsByTechAndTools(techAndToolsIds.toString())
-      );
-    }
+//     // співпадіння по технологіям - найголовніше
+//     console.log("tools right before calling db: " + techAndToolsIds);
+//     let techAndToolsMatches = [];
+//     if (Array.isArray(techAndToolsIds) && techAndToolsIds.length) {
+//       techAndToolsMatches = await getMatchesByFilter(
+//         techAndToolsIds,
+//         dbHelper.getSqlStudentIdsByTechAndTools(techAndToolsIds.toString())
+//       );
+//     }
 
-    // співпадіння по англійській
-    let englishMatches = await getMatchesByFilter(
-      params.studentEnglish,
-      dbHelper.getSqlStudentIdsByEnglish(params.studentEnglish)
-    );
+//     // співпадіння по англійській
+//     let englishMatches = await getMatchesByFilter(
+//       params.studentEnglish,
+//       dbHelper.getSqlStudentIdsByEnglish(params.studentEnglish)
+//     );
 
-    // співпадіння по освіті
-    let educationMatches = await getMatchesByFilter(
-      params.studentEducation,
-      dbHelper.getSqlStudentIdsByEducation(params.studentEducation)
-    );
+//     // співпадіння по освіті
+//     let educationMatches = await getMatchesByFilter(
+//       params.studentEducation,
+//       dbHelper.getSqlStudentIdsByEducation(params.studentEducation)
+//     );
 
-    // додаткові параметри
-    // співпадіння по області
-    let regionMatches = await getMatchesByFilter(
-      params.studentRegion,
-      dbHelper.getSqlStudentIdsByRegion(params.studentRegion)
-    );
+//     // додаткові параметри
+//     // співпадіння по області
+//     let regionMatches = await getMatchesByFilter(
+//       params.studentRegion,
+//       dbHelper.getSqlStudentIdsByRegion(params.studentRegion)
+//     );
 
-    // співпадіння по місту
-    let cityMatches = await getMatchesByFilter(params.studentCity, dbHelper.getSqlStudentIdsByCity(params.studentCity));
+//     // співпадіння по місту
+//     let cityMatches = await getMatchesByFilter(params.studentCity, dbHelper.getSqlStudentIdsByCity(params.studentCity));
 
-    // співпадіння по місцю роботи
-    let workplaceSql = "";
-    switch (params.studentWorkplace) {
-      case "1":
-      case "2":
-        workplaceSql = dbHelper.getSqlStudentIdsByWorkplace(params.studentWorkplace);
-      case "3":
-        workplaceSql = dbHelper.sqlGetAllStudentIds;
-        break;
-      default:
-        workplaceSql = dbHelper.sqlGetAllStudentIds;
-        break;
-    }
-    let workplaceMatches = await getMatchesByFilter(params.studentWorkplace, workplaceSql);
+//     // співпадіння по місцю роботи
+//     let workplaceSql = "";
+//     switch (params.studentWorkplace) {
+//       case "1":
+//       case "2":
+//         workplaceSql = dbHelper.getSqlStudentIdsByWorkplace(params.studentWorkplace);
+//       case "3":
+//         workplaceSql = dbHelper.sqlGetAllStudentIds;
+//         break;
+//       default:
+//         workplaceSql = dbHelper.sqlGetAllStudentIds;
+//         break;
+//     }
+//     let workplaceMatches = await getMatchesByFilter(params.studentWorkplace, workplaceSql);
 
-    // співпадіння по заробітній платі
-    let salaryMatches = await getMatchesByFilter(
-      params.studentSalary,
-      dbHelper.getSqlStudentIdsBySalary(params.studentSalary)
-    );
+//     // співпадіння по заробітній платі
+//     let salaryMatches = await getMatchesByFilter(
+//       params.studentSalary,
+//       dbHelper.getSqlStudentIdsBySalary(params.studentSalary)
+//     );
 
-    let resultsObj = {
-      techAndTools: techAndToolsMatches,
-      workArea: workAreaMatches,
-      position: positionMatches,
-      english: englishMatches,
-      workExp: workExpMatches,
-      education: educationMatches,
-      salary: salaryMatches,
-      region: regionMatches,
-      workplace: workplaceMatches,
-      city: cityMatches,
-    };
+//     let resultsObj = {
+//       techAndTools: techAndToolsMatches,
+//       workArea: workAreaMatches,
+//       position: positionMatches,
+//       english: englishMatches,
+//       workExp: workExpMatches,
+//       education: educationMatches,
+//       salary: salaryMatches,
+//       region: regionMatches,
+//       workplace: workplaceMatches,
+//       city: cityMatches,
+//     };
 
-    let resultSet = resultsObj.techAndTools;
-    let keys = Object.keys(resultsObj);
+//     let resultSet = resultsObj.techAndTools;
+//     let keys = Object.keys(resultsObj);
 
-    // пошук ідеальних кандидатів
-    for (const [key, value] of Object.entries(resultsObj)) {
-      console.log(`RESULTOBJ: ${key}: ${value}`);
+//     // пошук ідеальних кандидатів
+//     for (const [key, value] of Object.entries(resultsObj)) {
+//       console.log(`RESULTOBJ: ${key}: ${value}`);
 
-      let nextIndex = keys.indexOf(key) + 1;
-      let nextItem = keys[nextIndex];
+//       let nextIndex = keys.indexOf(key) + 1;
+//       let nextItem = keys[nextIndex];
 
-      resultSet = getMatchesIntersection(resultSet, resultsObj[nextItem]);
-    }
+//       resultSet = getMatchesIntersection(resultSet, resultsObj[nextItem]);
+//     }
 
-    console.log("final result set -------- " + resultSet);
+//     console.log("final result set -------- " + resultSet);
 
-    // перетини результатів - пошук кандидатів
-    console.log("workArea: " + workAreaMatches);
-    console.log("workExpMatches: " + workExpMatches);
-    console.log("techAndToolsMatches: " + techAndToolsMatches);
-    console.log("englishMatches: " + englishMatches);
-    console.log("educationMatches: " + educationMatches);
-    console.log("regionMatches: " + regionMatches);
-    console.log("cityMatches: " + cityMatches);
-    console.log("workplaceMatches: " + workplaceMatches);
-    console.log("salaryMatches: " + salaryMatches);
+//     // перетини результатів - пошук кандидатів
+//     console.log("workArea: " + workAreaMatches);
+//     console.log("workExpMatches: " + workExpMatches);
+//     console.log("techAndToolsMatches: " + techAndToolsMatches);
+//     console.log("englishMatches: " + englishMatches);
+//     console.log("educationMatches: " + educationMatches);
+//     console.log("regionMatches: " + regionMatches);
+//     console.log("cityMatches: " + cityMatches);
+//     console.log("workplaceMatches: " + workplaceMatches);
+//     console.log("salaryMatches: " + salaryMatches);
 
-    let result = resultSet;
+//     let result = resultSet;
 
-    console.log("result: " + result);
+//     console.log("result: " + result);
 
-    if (result.length) {
-      result = result;
-      result = getAdditionalResults(result, resultsObj);
-    } else {
-      try {
-        result = getAdditionalResults(result, resultsObj);
-      } catch {
-        console.log("default ---------- " + defaultValue);
-      }
-    }
+//     if (result.length) {
+//       result = result;
+//       result = getAdditionalResults(result, resultsObj);
+//     } else {
+//       try {
+//         result = getAdditionalResults(result, resultsObj);
+//       } catch {
+//         console.log("default ---------- " + defaultValue);
+//       }
+//     }
 
-    students =
-      result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
-  }
-  return students;
-};
+//     students =
+//       result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
+//   }
+//   return students;
+// };
 
-const getMatchesByFilter = async function (filter, sql) {
-  let matches = [];
-  if (filter === "" || filter === null || filter === undefined) {
-    return matches;
-  } else {
-    matches = await connectionPromise(sql, "");
-    return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
-  }
-};
+// const getMatchesByFilter = async function (filter, sql) {
+//   let matches = [];
+//   if (filter === "" || filter === null || filter === undefined) {
+//     return matches;
+//   } else {
+//     matches = await connectionPromise(sql, "");
+//     return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
+//   }
+// };
 
-const getMatchesIntersection = function (a, b) {
-  let intersection;
+// const getMatchesIntersection = function (a, b) {
+//   let intersection;
 
-  if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
-    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
-      intersection = a.filter((el) => b.includes(el));
-    } else {
-      intersection = a;
-    }
-  } else {
-    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
-      intersection = b;
-    } else {
-      intersection = [];
-    }
-  }
-  return intersection;
-};
+//   if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
+//     if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+//       intersection = a.filter((el) => b.includes(el));
+//     } else {
+//       intersection = a;
+//     }
+//   } else {
+//     if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+//       intersection = b;
+//     } else {
+//       intersection = [];
+//     }
+//   }
+//   return intersection;
+// };
 
-const getMatchesUnion = function (a, b) {
-  let union;
+// const getMatchesUnion = function (a, b) {
+//   let union;
 
-  if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
-    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
-      union = [...new Set([...a, ...b])];
-    } else {
-      union = a;
-    }
-  } else {
-    if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
-      union = b;
-    } else {
-      union = [];
-    }
-  }
+//   if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
+//     if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+//       union = [...new Set([...a, ...b])];
+//     } else {
+//       union = a;
+//     }
+//   } else {
+//     if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
+//       union = b;
+//     } else {
+//       union = [];
+//     }
+//   }
 
-  return union;
-};
+//   return union;
+// };
 
-const getAdditionalResults = function(currentResult, separateMatchesObj) {
-  let expandedResults = getMatchesUnion(currentResult, separateMatchesObj.techAndTools);
+// const getAdditionalResults = function(currentResult, separateMatchesObj) {
+//   let expandedResults = getMatchesUnion(currentResult, separateMatchesObj.techAndTools);
   
-  let keys = Object.keys(separateMatchesObj);
+//   let keys = Object.keys(separateMatchesObj);
 
-    // пошук додаткових кандидатів
-    for (const [key, value] of Object.entries(separateMatchesObj)) {
-      if (expandedResults.length < 20){
-        console.log(`RESULTOBJ: ${key}: ${value}`);
+//     // пошук додаткових кандидатів
+//     for (const [key, value] of Object.entries(separateMatchesObj)) {
+//       if (expandedResults.length < 20){
+//         console.log(`RESULTOBJ: ${key}: ${value}`);
 
-        let nextIndex = keys.indexOf(key) + 1;
-        let nextItem = keys[nextIndex];
+//         let nextIndex = keys.indexOf(key) + 1;
+//         let nextItem = keys[nextIndex];
         
-        expandedResults = getMatchesUnion(expandedResults, separateMatchesObj[nextItem]);
-        //console.log(key + " ---- resultSet: " + expandedResults + " nextItem: " + separateMatchesObj[nextItem]);
-      }
-      else break;
-  }
+//         expandedResults = getMatchesUnion(expandedResults, separateMatchesObj[nextItem]);
+//         //console.log(key + " ---- resultSet: " + expandedResults + " nextItem: " + separateMatchesObj[nextItem]);
+//       }
+//       else break;
+//   }
   
-  return expandedResults;
-}
+//   return expandedResults;
+// }
