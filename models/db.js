@@ -25,7 +25,7 @@ module.exports = class Database {
     (SELECT GROUP_CONCAT(student_technology_tool.technology_tool_id)
        FROM student_technology_tool
       WHERE student_technology_tool.student_id = student_details.id) AS technologies_and_tools
-  FROM student_details WHERE id IN (${resultIds})`;
+  FROM student_details WHERE id IN (${resultIds}) ORDER BY FIELD(student_details.id, ${resultIds})`;
   }
 
   getSqlStudentIdsByPosition(studentPosition) {
