@@ -3,7 +3,7 @@ const db = require("../models/db.js");
 const dbHelper = new db();
 
 module.exports = class Filter {
-    async getResultsByFilters (params) {
+  async getResultsByFilters(params) {
     let students = [];
     const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
     if (Object.keys(params).length === 0) students = defaultValue;
@@ -78,19 +78,10 @@ module.exports = class Filter {
       );
 
       // співпадіння по місцю роботи
-      let workplaceSql = "";
-      switch (params.studentWorkplace) {
-        case "1":
-        case "2":
-          workplaceSql = dbHelper.getSqlStudentIdsByWorkplace(params.studentWorkplace);
-        case "3":
-          workplaceSql = dbHelper.sqlGetAllStudentIds;
-          break;
-        default:
-          workplaceSql = dbHelper.sqlGetAllStudentIds;
-          break;
-      }
-      let workplaceMatches = await this.getMatchesByFilter(params.studentWorkplace, workplaceSql);
+      let workplaceMatches = await this.getMatchesByFilter(
+        params.studentWorkplace,
+        dbHelper.getSqlStudentIdsByWorkplace(params.studentWorkplace)
+      );
 
       // співпадіння по заробітній платі
       let salaryMatches = await this.getMatchesByFilter(
@@ -156,9 +147,9 @@ module.exports = class Filter {
         result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
     }
     return students;
-  };
+  }
 
-  async getMatchesByFilter (filter, sql) {
+  async getMatchesByFilter(filter, sql) {
     let matches = [];
     if (filter === "" || filter === null || filter === undefined) {
       return matches;
@@ -166,9 +157,9 @@ module.exports = class Filter {
       matches = await connectionPromise(sql, "");
       return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
     }
-  };
+  }
 
-  getMatchesIntersection (a, b) {
+  getMatchesIntersection(a, b) {
     let intersection;
 
     if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
@@ -185,9 +176,9 @@ module.exports = class Filter {
       }
     }
     return intersection;
-  };
+  }
 
-  getMatchesUnion (a, b) {
+  getMatchesUnion(a, b) {
     let union;
 
     if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
@@ -205,9 +196,9 @@ module.exports = class Filter {
     }
 
     return union;
-  };
+  }
 
-  getAdditionalResults (currentResult, separateMatchesObj) {
+  getAdditionalResults(currentResult, separateMatchesObj) {
     let expandedResults = this.getMatchesUnion(currentResult, separateMatchesObj.techAndTools);
 
     let keys = Object.keys(separateMatchesObj);
@@ -226,5 +217,5 @@ module.exports = class Filter {
     }
 
     return expandedResults;
-  };
+  }
 };

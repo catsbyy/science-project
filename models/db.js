@@ -1,3 +1,8 @@
+const englishModule = require("../public/helpers/englishLevelsList");
+const workAreaModule = require("../public/helpers/workAreaOptionsList");
+const workExpsModule = require("../public/helpers/workExpOptionsList");
+const workplaceModule = require("../public/helpers/workplaceOptionsList");
+
 module.exports = class Database {
   constructor() {
     this.sqlGetAllRegions = "SELECT * FROM region";
@@ -33,11 +38,31 @@ module.exports = class Database {
   }
 
   getSqlStudentIdsByWorkArea(studentWorkArea) {
-    return `SELECT id FROM student_details WHERE student_details.work_area_id = "${studentWorkArea}"`;
+    let workAreaIds =[];
+    for (const [key, value] of Object.entries(workAreaModule.workAreas)) {
+      workAreaIds.push(value.id);
+    };
+    let requiredWorkAreas;
+    if (studentWorkArea == workAreaIds[0]) {
+      requiredWorkAreas = [1,3]
+    } 
+    else if (studentWorkArea == workAreaIds[1]){
+      requiredWorkAreas = [2,3];
+    } else {
+      requiredWorkAreas = studentWorkArea;
+    };
+    console.log("required work area: " + requiredWorkAreas);
+    return `SELECT id FROM student_details WHERE student_details.work_area_id IN (${requiredWorkAreas})`;
   }
 
   getSqlStudentIdsByWorkExp(studentWorkExp) {
-    return `SELECT id FROM student_details WHERE student_details.work_experience_id = "${studentWorkExp}"`;
+    let workExpIds =[];
+    for (const [key, value] of Object.entries(workExpsModule.workExps)) {
+      workExpIds.push(value.id);
+    };
+    let requiredWorkExps = workExpIds.slice(0, studentWorkExp);
+    console.log("required experiences: " + requiredWorkExps);
+    return `SELECT id FROM student_details WHERE student_details.work_experience_id IN (${requiredWorkExps})`;
   }
 
   getSqlStudentIdsByTechAndTools(techAndToolsIds) {
@@ -45,11 +70,30 @@ module.exports = class Database {
   }
 
   getSqlStudentIdsByEnglish(studentEnglish) {
-    return `SELECT id FROM student_details WHERE student_details.english_level_id = "${studentEnglish}"`;
+    let englishIds =[];
+    for (const [key, value] of Object.entries(englishModule.englishLevels)) {
+      englishIds.push(value.id);
+    };
+    let requiredEnglishLevels = englishIds.slice(0, studentEnglish);
+    console.log("required english: " + requiredEnglishLevels);
+    return `SELECT id FROM student_details WHERE student_details.english_level_id IN (${requiredEnglishLevels})`;
   }
 
   getSqlStudentIdsByWorkplace(studentWorkplace) {
-    return `SELECT id FROM student_details WHERE student_details.workplace_id = "${studentWorkplace}"`;
+    let workplacesIds =[];
+    for (const [key, value] of Object.entries(workplaceModule.workplaces)) {
+      workplacesIds.push(value.id);
+    };
+    let requiredWorplaces ;
+    if (studentWorkplace == workplacesIds[0]) {
+      requiredWorplaces = [1,3]
+    } 
+    else if (studentWorkplace == workplacesIds[1]){
+      requiredWorplaces = [2,3];
+    } else {
+      requiredWorplaces = workplacesIds;
+    }
+    return `SELECT id FROM student_details WHERE student_details.workplace_id IN (${requiredWorplaces})`;
   }
 
   getSqlStudentIdsByRegion(studentRegion) {
