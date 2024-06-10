@@ -45,10 +45,9 @@ const businessRouter = require("./routes/businessRouter.js");
 const infoRouter = require("./routes/infoRouter.js");
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/students", studentRouter);
-app.get("/get-results", businessRouter);
-app.get("/get-student-details/:id", businessRouter);
-app.get("/server", infoRouter);
+app.use("/api/students", studentRouter);
+app.use("/api/business", businessRouter);
+app.use("/api/server", infoRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");
