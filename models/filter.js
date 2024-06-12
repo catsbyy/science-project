@@ -4,18 +4,18 @@ const dbHelper = new db();
 
 module.exports = class Filter {
   async getResultsByFilters(params) {
-    let students = [];
-    const defaultValue = await connectionPromise(dbHelper.sqlGetAllStudentDetails, "");
-    if (Object.keys(params).length === 0) students = defaultValue;
+    let candidates = [];
+    const defaultValue = await connectionPromise(dbHelper.sqlGetAllCandidateDetails, "");
+    if (Object.keys(params).length === 0) candidates = defaultValue;
     else {
       let techAndToolsIds = [];
 
       if (
-        params.studentTechAndTools !== "" &&
-        params.studentTechAndTools !== null &&
-        params.studentTechAndTools !== undefined
+        params.candidateTechAndTools !== "" &&
+        params.candidateTechAndTools !== null &&
+        params.candidateTechAndTools !== undefined
       ) {
-        techAndToolsIds = params.studentTechAndTools
+        techAndToolsIds = params.candidateTechAndTools
           .split(";")
           .filter(function (el) {
             return el !== "";
@@ -26,20 +26,20 @@ module.exports = class Filter {
       // основні параметри
       // співпадіння по посаді
       let positionMatches = await this.getMatchesByFilter(
-        params.studentPosition,
-        dbHelper.getSqlStudentIdsByPosition(params.studentPosition)
+        params.candidatePosition,
+        dbHelper.getSqlCandidateIdsByPosition(params.candidatePosition)
       );
 
       // співпадіння по області роботи
       const workAreaMatches = await this.getMatchesByFilter(
-        params.studentWorkArea,
-        dbHelper.getSqlStudentIdsByWorkArea(params.studentWorkArea)
+        params.candidateWorkArea,
+        dbHelper.getSqlCandidateIdsByWorkArea(params.candidateWorkArea)
       );
 
       // співпадіння по досвіду роботи
       let workExpMatches = await this.getMatchesByFilter(
-        params.studentWorkExp,
-        dbHelper.getSqlStudentIdsByWorkExp(params.studentWorkExp)
+        params.candidateWorkExp,
+        dbHelper.getSqlCandidateIdsByWorkExp(params.candidateWorkExp)
       );
 
       // співпадіння по технологіям - найголовніше
@@ -48,45 +48,45 @@ module.exports = class Filter {
       if (Array.isArray(techAndToolsIds) && techAndToolsIds.length) {
         techAndToolsMatches = await this.getMatchesByFilter(
           techAndToolsIds,
-          dbHelper.getSqlStudentIdsByTechAndTools(techAndToolsIds.toString())
+          dbHelper.getSqlCandidateIdsByTechAndTools(techAndToolsIds.toString())
         );
       }
 
       // співпадіння по англійській
       let englishMatches = await this.getMatchesByFilter(
-        params.studentEnglish,
-        dbHelper.getSqlStudentIdsByEnglish(params.studentEnglish)
+        params.candidateEnglish,
+        dbHelper.getSqlCandidateIdsByEnglish(params.candidateEnglish)
       );
 
       // співпадіння по освіті
       let educationMatches = await this.getMatchesByFilter(
-        params.studentEducation,
-        dbHelper.getSqlStudentIdsByEducation(params.studentEducation)
+        params.candidateEducation,
+        dbHelper.getSqlCandidateIdsByEducation(params.candidateEducation)
       );
 
       // додаткові параметри
       // співпадіння по області
       let regionMatches = await this.getMatchesByFilter(
-        params.studentRegion,
-        dbHelper.getSqlStudentIdsByRegion(params.studentRegion)
+        params.candidateRegion,
+        dbHelper.getSqlCandidateIdsByRegion(params.candidateRegion)
       );
 
       // співпадіння по місту
       let cityMatches = await this.getMatchesByFilter(
-        params.studentCity,
-        dbHelper.getSqlStudentIdsByCity(params.studentCity)
+        params.candidateCity,
+        dbHelper.getSqlCandidateIdsByCity(params.candidateCity)
       );
 
       // співпадіння по місцю роботи
       let workplaceMatches = await this.getMatchesByFilter(
-        params.studentWorkplace,
-        dbHelper.getSqlStudentIdsByWorkplace(params.studentWorkplace)
+        params.candidateWorkplace,
+        dbHelper.getSqlCandidateIdsByWorkplace(params.candidateWorkplace)
       );
 
       // співпадіння по заробітній платі
       let salaryMatches = await this.getMatchesByFilter(
-        params.studentSalary,
-        dbHelper.getSqlStudentIdsBySalary(params.studentSalary)
+        params.candidateSalary,
+        dbHelper.getSqlCandidateIdsBySalary(params.candidateSalary)
       );
 
       let resultsObj = {
@@ -143,10 +143,10 @@ module.exports = class Filter {
         }
       }
 
-      students =
-        result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleStudents(result), "") : defaultValue;
+      candidates =
+        result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleCandidates(result), "") : defaultValue;
     }
-    return students;
+    return candidates;
   }
 
   async getMatchesByFilter(filter, sql) {
@@ -155,7 +155,7 @@ module.exports = class Filter {
       return matches;
     } else {
       matches = await connectionPromise(sql, "");
-      return sql.includes("student_technology_tool") ? matches.map((a) => a.student_id) : matches.map((a) => a.id);
+      return sql.includes("candidate_technology_tool") ? matches.map((a) => a.candidate_id) : matches.map((a) => a.id);
     }
   }
 

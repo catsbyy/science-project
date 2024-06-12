@@ -40,14 +40,14 @@ connection.connect(function (err) {
 });
 
 app.use(express.json());
-const studentRouter = require("./routes/studentRouter.js");
+const candidateRouter = require("./routes/candidateRouter.js");
 const businessRouter = require("./routes/businessRouter.js");
 const infoRouter = require("./routes/infoRouter.js");
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/students", studentRouter);
+app.use("/api/candidates", candidateRouter);
 app.use("/api/business", businessRouter);
-app.use("/api/server", infoRouter);
+app.use("/api/get-meta-data", infoRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Сторінку не знайдено");

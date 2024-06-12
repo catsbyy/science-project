@@ -1,14 +1,14 @@
 const app = require("../app.js");
 const db = require("../models/db.js");
 const dbHelper = new db();
-const studentObj = require("../models/student.js");
+const candidateObj = require("../models/candidate.js");
 
-exports.postStudents = async function (request, response) {
-  const student = new studentObj(request);
+exports.postCandidates = async function (request, response) {
+  const candidate = new candidateObj(request);
 
-  await app.connection(dbHelper.sqlInsertStudentDetails, Object.values(student));
+  await app.connection(dbHelper.sqlInsertCandidateDetails, Object.values(candidate));
 
-  const techAndToolsIds = request.body.studentTechAndTools
+  const techAndToolsIds = request.body.candidateTechAndTools
     .split(";")
     .filter(function (el) {
       return el != "";
@@ -18,7 +18,7 @@ exports.postStudents = async function (request, response) {
   techAndToolsSql = "";
   techAndToolsIds.forEach((tech, index) => {
     if (index == 0) {
-      techAndToolsSql += `INSERT INTO student_technology_tool(student_id, technology_tool_id) VALUES (LAST_INSERT_ID(), ${tech})`;
+      techAndToolsSql += `INSERT INTO candidate_technology_tool(candidate_id, technology_tool_id) VALUES (LAST_INSERT_ID(), ${tech})`;
     } else if (index == techAndToolsIds.length - 1 && index != 0) {
       techAndToolsSql += `,(LAST_INSERT_ID(), ${tech});`;
     } else {
