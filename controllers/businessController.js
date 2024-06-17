@@ -5,17 +5,17 @@ const dbHelper = new db();
 const filterHelper = new filter();
 
 exports.getResults = async function (req, res) {
-  const students = await filterHelper.getResultsByFilters(req.query);
+  const candidates = await filterHelper.getResultsByFilters(req.query);
  
   res.json({
-    students: students,
+    candidates: candidates,
   });
 };
 
-exports.getStudentDetails = async function (req, res){
-  const student = await connection(dbHelper.getSqlOneStudent(req.params.id), "");
+exports.getCandidateDetails = async function (req, res){
+  const candidate = await connection(dbHelper.getSqlOneCandidate(req.params.id), "");
 
   res.json({
-    student: student,
+    candidate: candidate,
   });
 };

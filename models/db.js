@@ -25,7 +25,7 @@ module.exports = class Database {
       FROM candidate_details WHERE id = ${candidateId}`;
   }
 
-  getSqlMultiplecCandidates(resultIds) {
+  getSqlMultipleCandidates(resultIds) {
     return `SELECT candidate_details.*,
     (SELECT GROUP_CONCAT(candidate_technology_tool.technology_tool_id)
        FROM candidate_technology_tool
