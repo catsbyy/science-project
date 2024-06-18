@@ -7,6 +7,14 @@ module.exports = class Database {
   constructor() {
     this.sqlGetAllRegions = "SELECT * FROM region";
     this.sqlGetAllTechAndTools = "SELECT * FROM technologies_and_tools";
+    this.sqlGetAllEnglishLevels = "SELECT * FROM english_level";
+    this.sqlGetAllEducationLevels = "SELECT * FROM education_level";
+    this.sqlGetAllPositions = "SELECT * FROM position";
+    this.sqlGetAllSalaries = "SELECT * FROM salary";
+    this.sqlGetAllWorkAreas = "SELECT * FROM work_area";
+    this.sqlGetAllWorkExps = "SELECT * FROM work_experience";
+    this.sqlGetAllWorkplaces = "SELECT * FROM workplace";
+
     this.sqlGetAllCandidateDetails = `SELECT candidate_details.*,
         (SELECT GROUP_CONCAT(candidate_technology_tool.technology_tool_id)
            FROM candidate_technology_tool
