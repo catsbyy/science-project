@@ -41,82 +41,67 @@ module.exports = class Database {
   FROM candidate_details WHERE id IN (${resultIds}) ORDER BY FIELD(candidate_details.id, ${resultIds})`;
   }
 
+  createInClause(ids) {
+    return ids.length ? `IN (${ids.join(",")})` : "= -1"; // Prevents empty IN clause error
+  }
+
+  getSqlCandidateIdsByField(field, values) {
+    const clause = this.createInClause(values);
+    return `SELECT id FROM candidate_details WHERE ${field} ${clause}`;
+  }
+
   getSqlCandidateIdsByPosition(candidatePosition) {
-    return `SELECT id FROM candidate_details WHERE candidate_details.position_id = "${candidatePosition}"`;
+    return this.getSqlCandidateIdsByField("position_id", [candidatePosition]);
   }
 
   getSqlCandidateIdsByWorkArea(candidateWorkArea) {
-    let workAreaIds =[];
-    for (const [key, value] of Object.entries(workAreaModule.workAreas)) {
-      workAreaIds.push(value.id);
+    const workAreaMap = {
+      [workAreaModule.workAreas[0].id]: [1, 3],
+      [workAreaModule.workAreas[1].id]: [2, 3]
     };
-    let requiredWorkAreas;
-    if (candidateWorkArea == workAreaIds[0]) {
-      requiredWorkAreas = [1,3]
-    } 
-    else if (candidateWorkArea == workAreaIds[1]){
-      requiredWorkAreas = [2,3];
-    } else {
-      requiredWorkAreas = candidateWorkArea;
-    };
-    console.log("required work area: " + requiredWorkAreas);
-    return `SELECT id FROM candidate_details WHERE candidate_details.work_area_id IN (${requiredWorkAreas})`;
+    const requiredWorkAreas = workAreaMap[candidateWorkArea] || [candidateWorkArea];
+    return this.getSqlCandidateIdsByField("work_area_id", requiredWorkAreas);
   }
 
   getSqlCandidateIdsByWorkExp(candidateWorkExp) {
-    let workExpIds =[];
-    for (const [key, value] of Object.entries(workExpsModule.workExps)) {
-      workExpIds.push(value.id);
-    };
-    let requiredWorkExps = workExpIds.slice(0, candidateWorkExp);
-    console.log("required experiences: " + requiredWorkExps);
-    return `SELECT id FROM candidate_details WHERE candidate_details.work_experience_id IN (${requiredWorkExps})`;
+    const workExpIds = Object.values(workExpsModule.workExps).map(exp => exp.id);
+    const requiredWorkExps = workExpIds.slice(0, candidateWorkExp);
+    return this.getSqlCandidateIdsByField("work_experience_id", requiredWorkExps);
   }
 
   getSqlCandidateIdsByTechAndTools(techAndToolsIds) {
-    return `SELECT candidate_id FROM candidate_technology_tool WHERE candidate_technology_tool.technology_tool_id IN (${techAndToolsIds})`;
+    const clause = this.createInClause(techAndToolsIds);
+    return `SELECT candidate_id FROM candidate_technology_tool WHERE technology_tool_id ${clause}`;
   }
 
   getSqlCandidateIdsByEnglish(candidateEnglish) {
-    let englishIds =[];
-    for (const [key, value] of Object.entries(englishModule.englishLevels)) {
-      englishIds.push(value.id);
-    };
-    let requiredEnglishLevels = englishIds.slice(0, candidateEnglish);
-    console.log("required english: " + requiredEnglishLevels);
-    return `SELECT id FROM candidate_details WHERE candidate_details.english_level_id IN (${requiredEnglishLevels})`;
+    const englishIds = Object.values(englishModule.englishLevels).map(level => level.id);
+    const requiredEnglishLevels = englishIds.slice(0, candidateEnglish);
+    return this.getSqlCandidateIdsByField("english_level_id", requiredEnglishLevels);
   }
 
   getSqlCandidateIdsByWorkplace(candidateWorkplace) {
-    let workplacesIds =[];
-    for (const [key, value] of Object.entries(workplaceModule.workplaces)) {
-      workplacesIds.push(value.id);
+    const workplaceMap = {
+      [workplaceModule.workplaces[0].id]: [1, 3],
+      [workplaceModule.workplaces[1].id]: [2, 3]
     };
-    let requiredWorplaces ;
-    if (candidateWorkplace == workplacesIds[0]) {
-      requiredWorplaces = [1,3]
-    } 
-    else if (candidateWorkplace == workplacesIds[1]){
-      requiredWorplaces = [2,3];
-    } else {
-      requiredWorplaces = workplacesIds;
-    }
-    return `SELECT id FROM candidate_details WHERE candidate_details.workplace_id IN (${requiredWorplaces})`;
+    const requiredWorkplaces = workplaceMap[candidateWorkplace] || [candidateWorkplace];
+    return this.getSqlCandidateIdsByField("workplace_id", requiredWorkplaces);
   }
 
   getSqlCandidateIdsByRegion(candidateRegion) {
-    return `SELECT id FROM candidate_details WHERE candidate_details.region_id = "${candidateRegion}"`;
+    return this.getSqlCandidateIdsByField("region_id", [candidateRegion]);
   }
 
   getSqlCandidateIdsByEducation(candidateEducation) {
-    return `SELECT id FROM candidate_details WHERE candidate_details.education_level_id = "${candidateEducation}"`;
+    return this.getSqlCandidateIdsByField("education_level_id", [candidateEducation]);
   }
 
   getSqlCandidateIdsByCity(candidateCity) {
-    return `SELECT id FROM candidate_details WHERE candidate_details.city = "${candidateCity}"`;
+    return `SELECT id FROM candidate_details WHERE city = "${candidateCity}"`;
   }
 
   getSqlCandidateIdsBySalary(candidateSalary) {
-    return `SELECT id FROM candidate_details WHERE candidate_details.salary_id = "${candidateSalary}"`;
+    return this.getSqlCandidateIdsByField("salary_id", [candidateSalary]);
   }
 };
