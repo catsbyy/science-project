@@ -14,7 +14,7 @@ exports.getResults = async function (req, res) {
 
 exports.getCandidateDetails = async function (req, res){
   const candidate = await connection(dbHelper.getSqlOneCandidate(req.params.id), "");
-
+  
   res.json({
     candidate: candidate,
   });
