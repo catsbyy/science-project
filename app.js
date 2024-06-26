@@ -43,13 +43,13 @@ app.use(express.json());
 const candidateRouter = require("./routes/candidateRouter.js");
 const businessRouter = require("./routes/businessRouter.js");
 const infoRouter = require("./routes/infoRouter.js");
-const userRouter = require("./routes/userRouter.js");
+const authRouter = require("./routes/authRouter.js");
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/candidates", candidateRouter);
 app.use("/api/business", businessRouter);
 app.use("/api/get-meta-data", infoRouter);
-app.use("/api/user", userRouter);
+app.use("/api/auth", authRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Page is not found");
