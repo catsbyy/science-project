@@ -6,4 +6,4 @@ userRouter.get("/login", userController.loginUser);
 
 userRouter.get("/register", userController.registerUser);
 
-module.exports = infoRouter;
+module.exports = userRouter;
