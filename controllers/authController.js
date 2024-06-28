@@ -42,6 +42,8 @@ exports.loginUser = async function (req, res) {
           company_name: user.company_name,
         },
       });
+
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // Cookie expires after 30 days
     });
   } catch (err) {
     console.error("Error querying the database:", err);
