@@ -9,4 +9,6 @@ authRouter.post("/register", authController.registerUser);
 
 authRouter.get("/me", authenticateToken, authController.checkUser);
 
+authRouter.post("/logout", authController.logoutUser);
+
 module.exports = authRouter;

@@ -114,3 +114,8 @@ exports.checkUser = async function (req, res) {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+exports.logoutUser = async function (req, res) {
+  res.clearCookie("token");
+  res.json({ message: "Logout successful" });
+};
