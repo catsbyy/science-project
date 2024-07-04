@@ -25,12 +25,12 @@ module.exports = class Database {
       "INSERT INTO candidate_details(name, surname, patronymic, date_of_birth, summary, profile_picture, region_id, city, street, house_number, mobile_number, email, linkedin, github, education_level_id, university, specialty, english_level_id, position_id, work_experience_id, work_area_id, salary_id, workplace_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
   }
 
-  getSqlOneCandidate(candidateId) {
+  getSqlOneCandidate(candidateId, isByUserId) {
     return `SELECT candidate_details.*,
-        (SELECT GROUP_CONCAT(candidate_technology_tool.technology_tool_id)
-           FROM candidate_technology_tool
-          WHERE candidate_technology_tool.candidate_id = candidate_details.id) AS technologies_and_tools
-      FROM candidate_details WHERE id = ${candidateId}`;
+      (SELECT GROUP_CONCAT(candidate_technology_tool.technology_tool_id)
+         FROM candidate_technology_tool
+        WHERE candidate_technology_tool.candidate_id = candidate_details.id) AS technologies_and_tools
+      FROM candidate_details WHERE ${isByUserId === "true" ? `user_id = ${candidateId}` : `id = ${candidateId}`}`;
   }
 
   getSqlMultipleCandidates(resultIds) {
@@ -57,14 +57,14 @@ module.exports = class Database {
   getSqlCandidateIdsByWorkArea(candidateWorkArea) {
     const workAreaMap = {
       [workAreaModule.workAreas[0].id]: [1, 3],
-      [workAreaModule.workAreas[1].id]: [2, 3]
+      [workAreaModule.workAreas[1].id]: [2, 3],
     };
     const requiredWorkAreas = workAreaMap[candidateWorkArea] || [candidateWorkArea];
     return this.getSqlCandidateIdsByField("work_area_id", requiredWorkAreas);
   }
 
   getSqlCandidateIdsByWorkExp(candidateWorkExp) {
-    const workExpIds = Object.values(workExpsModule.workExps).map(exp => exp.id);
+    const workExpIds = Object.values(workExpsModule.workExps).map((exp) => exp.id);
     const requiredWorkExps = workExpIds.slice(0, candidateWorkExp);
     return this.getSqlCandidateIdsByField("work_experience_id", requiredWorkExps);
   }
@@ -75,7 +75,7 @@ module.exports = class Database {
   }
 
   getSqlCandidateIdsByEnglish(candidateEnglish) {
-    const englishIds = Object.values(englishModule.englishLevels).map(level => level.id);
+    const englishIds = Object.values(englishModule.englishLevels).map((level) => level.id);
     const requiredEnglishLevels = englishIds.slice(0, candidateEnglish);
     return this.getSqlCandidateIdsByField("english_level_id", requiredEnglishLevels);
   }
@@ -83,7 +83,7 @@ module.exports = class Database {
   getSqlCandidateIdsByWorkplace(candidateWorkplace) {
     const workplaceMap = {
       [workplaceModule.workplaces[0].id]: [1, 3],
-      [workplaceModule.workplaces[1].id]: [2, 3]
+      [workplaceModule.workplaces[1].id]: [2, 3],
     };
     const requiredWorkplaces = workplaceMap[candidateWorkplace] || [candidateWorkplace];
     return this.getSqlCandidateIdsByField("workplace_id", requiredWorkplaces);

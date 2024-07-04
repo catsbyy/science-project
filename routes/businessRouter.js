@@ -4,6 +4,6 @@ const businessRouter = express.Router();
 
 businessRouter.get("/get-results", businessController.getResults);
 
-businessRouter.get("/get-candidate-details/:id", businessController.getCandidateDetails);
+businessRouter.get("/get-candidate-details/:id/:isByUserId?", businessController.getCandidateDetails);
 
 module.exports = businessRouter;

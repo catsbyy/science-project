@@ -13,7 +13,8 @@ exports.getResults = async function (req, res) {
 };
 
 exports.getCandidateDetails = async function (req, res){
-  const candidate = await connection(dbHelper.getSqlOneCandidate(req.params.id), "");
+  const { id, isByUserId } = req.params;
+  const candidate = await connection(dbHelper.getSqlOneCandidate(id, isByUserId), "");
   
   res.json({
     candidate: candidate,
