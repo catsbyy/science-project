@@ -68,12 +68,14 @@ const candidateRouter = require("./routes/candidateRouter.js");
 const businessRouter = require("./routes/businessRouter.js");
 const infoRouter = require("./routes/infoRouter.js");
 const authRouter = require("./routes/authRouter.js");
+const userRouter = require("./routes/userRouter.js");
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/candidates", candidateRouter);
 app.use("/api/business", businessRouter);
 app.use("/api/get-meta-data", infoRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 
 app.use(function (req, res, next) {
   res.status(404).send("Page is not found");
