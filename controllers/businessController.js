@@ -20,3 +20,5 @@ exports.getCandidateDetails = async function (req, res){
     candidate: candidate,
   });
 };
+
+/* don't forger to add endpoints for favorites */
