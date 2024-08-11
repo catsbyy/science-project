@@ -21,7 +21,30 @@ exports.getRegionsAndTechs = async function (req, res) {
     salary: salary,
     workArea: workArea,
     workExp: workExp,
-    workplace: workplace
+    workplace: workplace,
   });
+};
+
+exports.getStatistics = async function (req, res) {
+  try {
+    const statistics = await connectionPromise(
+      `SELECT 
+        SUM(CASE WHEN role = 'candidate' THEN 1 ELSE 0 END) as candidate_count,
+        SUM(CASE WHEN role = 'business' THEN 1 ELSE 0 END) as business_count
+      FROM 
+        users;`
+    );
+
+    const candidateCount = statistics[0].candidate_count;
+    const businessCount = statistics[0].business_count;
+
+    res.json({
+      candidate_count: candidateCount,
+      business_count: businessCount
+    });
+  } catch (error) {
+    console.error('Failed to get statistics:', error);
+    res.status(500).json({ error: 'Failed to get statistics' });
+  }
 };
 

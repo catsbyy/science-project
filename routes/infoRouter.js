@@ -4,4 +4,6 @@ const infoRouter = express.Router();
 
 infoRouter.get("/", infoController.getRegionsAndTechs);
 
+infoRouter.get("/statistics", infoController.getStatistics);
+
 module.exports = infoRouter;
