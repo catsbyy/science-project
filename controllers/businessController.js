@@ -5,24 +5,43 @@ const dbHelper = new db();
 const filterHelper = new filter();
 
 exports.getResults = async function (req, res) {
-  const candidates = await filterHelper.getResultsByFilters(req.query);
+  try {
+    const candidates = await filterHelper.getResultsByFilters(req.query);
 
-  res.json({
-    candidates: candidates,
-  });
+    res.json({
+      candidates: candidates,
+    });
+  } catch (error) {
+    console.error("Error getting results:", error);
+    res.status(500).json({ error: "Failed to get candidates." });
+  }
 };
 
 exports.getCandidateDetails = async function (req, res) {
   const { id, isByUserId } = req.params;
-  const candidate = await connection(dbHelper.getSqlOneCandidate(id, isByUserId), "");
 
-  res.json({
-    candidate: candidate,
-  });
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "Invalid candidate ID." });
+  }
+
+  try {
+    const candidate = await connection(dbHelper.getSqlOneCandidate(id, isByUserId), "");
+
+    res.json({
+      candidate: candidate,
+    });
+  } catch (error) {
+    console.error("Error getting candidate details:", error);
+    res.status(500).json({ error: "Failed to get candidate details." });
+  }
 };
 
 exports.addToFavorites = async (req, res) => {
   const { businessUserId, candidateId } = req.body;
+
+  if (!businessUserId || !candidateId || isNaN(businessUserId) || isNaN(candidateId)) {
+    return res.status(400).json({ error: "Invalid input data." });
+  }
 
   try {
     const result = await connection("INSERT INTO favorites (business_user_id, candidate_id) VALUES (?, ?)", [
@@ -31,7 +50,8 @@ exports.addToFavorites = async (req, res) => {
     ]);
     res.json({ success: true, message: "Candidate added to favorites" });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to add candidate to favorites", error });
+    console.error("Error adding to favorites:", error);
+    res.status(500).json({ success: false, message: "Failed to add candidate to favorites" });
   }
 };
 
