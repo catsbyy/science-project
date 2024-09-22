@@ -23,128 +23,99 @@ module.exports = class Filter {
           .map(Number);
       }
 
-      // основні параметри
-      // співпадіння по посаді
-      let positionMatches = await this.getMatchesByFilter(
-        params.candidatePosition,
-        dbHelper.getSqlCandidateIdsByPosition(params.candidatePosition)
-      );
-
-      // співпадіння по області роботи
-      const workAreaMatches = await this.getMatchesByFilter(
-        params.candidateWorkArea,
-        dbHelper.getSqlCandidateIdsByWorkArea(params.candidateWorkArea)
-      );
-
-      // співпадіння по досвіду роботи
-      let workExpMatches = await this.getMatchesByFilter(
-        params.candidateWorkExp,
-        dbHelper.getSqlCandidateIdsByWorkExp(params.candidateWorkExp)
-      );
-
-      // співпадіння по технологіям - найголовніше
-      console.log("tools right before calling db: " + techAndToolsIds);
-      let techAndToolsMatches = [];
-      if (Array.isArray(techAndToolsIds) && techAndToolsIds.length) {
-        techAndToolsMatches = await this.getMatchesByFilter(
-          techAndToolsIds,
-          dbHelper.getSqlCandidateIdsByTechAndTools(techAndToolsIds.toString())
-        );
-      }
-
-      // співпадіння по англійській
-      let englishMatches = await this.getMatchesByFilter(
-        params.candidateEnglish,
-        dbHelper.getSqlCandidateIdsByEnglish(params.candidateEnglish)
-      );
-
-      // співпадіння по освіті
-      let educationMatches = await this.getMatchesByFilter(
-        params.candidateEducation,
-        dbHelper.getSqlCandidateIdsByEducation(params.candidateEducation)
-      );
-
-      // додаткові параметри
-      // співпадіння по області
-      let regionMatches = await this.getMatchesByFilter(
-        params.candidateRegion,
-        dbHelper.getSqlCandidateIdsByRegion(params.candidateRegion)
-      );
-
-      // співпадіння по місту
-      let cityMatches = await this.getMatchesByFilter(
-        params.candidateCity,
-        dbHelper.getSqlCandidateIdsByCity(params.candidateCity)
-      );
-
-      // співпадіння по місцю роботи
-      let workplaceMatches = await this.getMatchesByFilter(
-        params.candidateWorkplace,
-        dbHelper.getSqlCandidateIdsByWorkplace(params.candidateWorkplace)
-      );
-
-      // співпадіння по заробітній платі
-      let salaryMatches = await this.getMatchesByFilter(
-        params.candidateSalary,
-        dbHelper.getSqlCandidateIdsBySalary(params.candidateSalary)
-      );
-
-      let resultsObj = {
-        techAndTools: techAndToolsMatches,
-        workArea: workAreaMatches,
-        position: positionMatches,
-        english: englishMatches,
-        workExp: workExpMatches,
-        education: educationMatches,
-        salary: salaryMatches,
-        region: regionMatches,
-        workplace: workplaceMatches,
-        city: cityMatches,
+      // Вага фільтрів
+      const filterWeights = {
+        techAndTools: 0.3,
+        position: 0.2,
+        workArea: 0.2,
+        workExp: 0.15,       
+        english: 0.1,
+        education: 0.05,
+        salary: 0.05,
+        region: 0.02,
+        city: 0.02,
+        workplace: 0.01,
       };
 
-      let resultSet = resultsObj.techAndTools;
-      let keys = Object.keys(resultsObj);
+      // Основні фільтри: важливі фільтри включають технології, позицію, область роботи, досвід та англійську
+      const essentialFilters = {
+        techAndTools: await this.getMatchesByFilter(
+          techAndToolsIds,
+          dbHelper.getSqlCandidateIdsByTechAndTools(techAndToolsIds.toString())
+        ),
+        position: await this.getMatchesByFilter(
+          params.candidatePosition,
+          dbHelper.getSqlCandidateIdsByPosition(params.candidatePosition)
+        ),
+        workArea: await this.getMatchesByFilter(
+          params.candidateWorkArea,
+          dbHelper.getSqlCandidateIdsByWorkArea(params.candidateWorkArea)
+        ),
+        workExp: await this.getMatchesByFilter(
+          params.candidateWorkExp,
+          dbHelper.getSqlCandidateIdsByWorkExp(params.candidateWorkExp)
+        ),
+        english: await this.getMatchesByFilter(
+          params.candidateEnglish,
+          dbHelper.getSqlCandidateIdsByEnglish(params.candidateEnglish)
+        ),
+      };
 
-      // пошук ідеальних кандидатів
-      for (const [key, value] of Object.entries(resultsObj)) {
-        console.log(`RESULTOBJ: ${key}: ${value}`);
+      // Перевіряємо, чи кандидати проходять через важливі фільтри
+      const essentialCandidates = this.getEssentialCandidates(essentialFilters);
 
-        let nextIndex = keys.indexOf(key) + 1;
-        let nextItem = keys[nextIndex];
-
-        resultSet = this.getMatchesIntersection(resultSet, resultsObj[nextItem]);
+      if (essentialCandidates.length === 0) {
+        return defaultValue; // Якщо немає жодного кандидата, який відповідає важливим фільтрам
       }
 
-      console.log("final result set -------- " + resultSet);
+      // Збирання збігів по решті фільтрів тільки для кандидатів, які пройшли через важливі
+      const filtersResults = {
+        techAndTools: essentialFilters.techAndTools,
+        position: essentialFilters.position,
+        workArea: essentialFilters.workArea,
+        workExp: essentialFilters.workExp,
+        english: essentialFilters.english,
+        education: await this.getMatchesByFilter(
+          params.candidateEducation,
+          dbHelper.getSqlCandidateIdsByEducation(params.candidateEducation)
+        ),
+        salary: await this.getMatchesByFilter(
+          params.candidateSalary,
+          dbHelper.getSqlCandidateIdsBySalary(params.candidateSalary)
+        ),
+        region: await this.getMatchesByFilter(
+          params.candidateRegion,
+          dbHelper.getSqlCandidateIdsByRegion(params.candidateRegion)
+        ),
+        city: await this.getMatchesByFilter(
+          params.candidateCity,
+          dbHelper.getSqlCandidateIdsByCity(params.candidateCity)
+        ),
+        workplace: await this.getMatchesByFilter(
+          params.candidateWorkplace,
+          dbHelper.getSqlCandidateIdsByWorkplace(params.candidateWorkplace)
+        ),
+      };
 
-      // перетини результатів - пошук кандидатів
-      console.log("workArea: " + workAreaMatches);
-      console.log("workExpMatches: " + workExpMatches);
-      console.log("techAndToolsMatches: " + techAndToolsMatches);
-      console.log("englishMatches: " + englishMatches);
-      console.log("educationMatches: " + educationMatches);
-      console.log("regionMatches: " + regionMatches);
-      console.log("cityMatches: " + cityMatches);
-      console.log("workplaceMatches: " + workplaceMatches);
-      console.log("salaryMatches: " + salaryMatches);
-
-      let result = resultSet;
-
-      console.log("result: " + result);
-
-      if (result.length) {
-        result = result;
-        result = this.getAdditionalResults(result, resultsObj);
-      } else {
-        try {
-          result = this.getAdditionalResults(result, resultsObj);
-        } catch {
-          console.log("default ---------- " + defaultValue);
-        }
+      // Обчислення рейтингу кандидатів
+      const candidatesScores = {};
+      for (const [filter, matches] of Object.entries(filtersResults)) {
+        matches.forEach(candidateId => {
+          if (!candidatesScores[candidateId]) {
+            candidatesScores[candidateId] = 0;
+          }
+          candidatesScores[candidateId] += filterWeights[filter]; // Додаємо вагу кожного фільтру до кандидата
+        });
       }
 
-      candidates =
-        result.length !== 0 ? await connectionPromise(dbHelper.getSqlMultipleCandidates(result), "") : defaultValue;
+      // Пошук кандидатів з найвищими рейтингами
+      const sortedCandidates = Object.keys(candidatesScores)
+        .filter(id => candidatesScores[id] > 0) // Враховуємо тільки тих, у кого є збіги
+        .sort((a, b) => candidatesScores[b] - candidatesScores[a]); // Сортуємо за рейтингом
+
+      candidates = sortedCandidates.length > 0 
+        ? await connectionPromise(dbHelper.getSqlMultipleCandidates(sortedCandidates), "") 
+        : defaultValue;
     }
     return candidates;
   }
@@ -157,6 +128,19 @@ module.exports = class Filter {
       matches = await connectionPromise(sql, "");
       return sql.includes("candidate_technology_tool") ? matches.map((a) => a.candidate_id) : matches.map((a) => a.id);
     }
+  }
+
+  // Функція для перевірки відповідності кандидатів важливим фільтрам
+  getEssentialCandidates(essentialFilters) {
+    let essentialCandidates = essentialFilters.techAndTools;
+
+    // Перетинаємо результати важливих фільтрів (англійська, технології, позиція, досвід та область роботи)
+    essentialCandidates = this.getMatchesIntersection(essentialCandidates, essentialFilters.position);
+    essentialCandidates = this.getMatchesIntersection(essentialCandidates, essentialFilters.workArea);
+    essentialCandidates = this.getMatchesIntersection(essentialCandidates, essentialFilters.workExp);
+    essentialCandidates = this.getMatchesIntersection(essentialCandidates, essentialFilters.english);
+
+    return essentialCandidates; // Повертаємо кандидатів, які відповідають обов'язковим критеріям
   }
 
   getMatchesIntersection(a, b) {
@@ -176,46 +160,5 @@ module.exports = class Filter {
       }
     }
     return intersection;
-  }
-
-  getMatchesUnion(a, b) {
-    let union;
-
-    if (a !== "" && a !== null && a !== undefined && a.length !== 0) {
-      if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
-        union = [...new Set([...a, ...b])];
-      } else {
-        union = a;
-      }
-    } else {
-      if (b !== "" && b !== null && b !== undefined && b.length !== 0) {
-        union = b;
-      } else {
-        union = [];
-      }
-    }
-
-    return union;
-  }
-
-  getAdditionalResults(currentResult, separateMatchesObj) {
-    let expandedResults = this.getMatchesUnion(currentResult, separateMatchesObj.techAndTools);
-
-    let keys = Object.keys(separateMatchesObj);
-
-    // пошук додаткових кандидатів
-    for (const [key, value] of Object.entries(separateMatchesObj)) {
-      if (expandedResults.length < 20) {
-        console.log(`RESULTOBJ: ${key}: ${value}`);
-
-        let nextIndex = keys.indexOf(key) + 1;
-        let nextItem = keys[nextIndex];
-
-        expandedResults = this.getMatchesUnion(expandedResults, separateMatchesObj[nextItem]);
-        //console.log(key + " ---- resultSet: " + expandedResults + " nextItem: " + separateMatchesObj[nextItem]);
-      } else break;
-    }
-
-    return expandedResults;
   }
 };

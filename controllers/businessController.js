@@ -76,8 +76,6 @@ exports.getFavorites = async function (req, res) {
 
   let favorites;
 
-  let candidates;
-
   try {
     if (fetchAllDetails === "true") {
       favorites = await connection("SELECT * FROM favorites WHERE business_user_id = ?", [businessUserId]);

@@ -42,7 +42,7 @@ module.exports = class Database {
   }
 
   createInClause(ids) {
-    return ids.length ? `IN (${ids.join(",")})` : "= -1"; // Prevents empty IN clause error
+    return ids.length ? `IN (${ids})` : "= -1"; // Prevents empty IN clause error
   }
 
   getSqlCandidateIdsByField(field, values) {
@@ -70,6 +70,8 @@ module.exports = class Database {
   }
 
   getSqlCandidateIdsByTechAndTools(techAndToolsIds) {
+    console.log(JSON.stringify(techAndToolsIds));
+    console.log(typeof techAndToolsIds);
     const clause = this.createInClause(techAndToolsIds);
     return `SELECT candidate_id FROM candidate_technology_tool WHERE technology_tool_id ${clause}`;
   }
