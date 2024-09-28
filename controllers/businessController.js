@@ -74,18 +74,19 @@ exports.getFavorites = async function (req, res) {
   const { businessUserId } = req.params;
   const fetchAllDetails = req.query.fetchAllDetails || "false";
 
-  let favorites;
-
   try {
-    if (fetchAllDetails === "true") {
-      favorites = await connection("SELECT * FROM favorites WHERE business_user_id = ?", [businessUserId]);
+    let favorites = await connection("SELECT * FROM favorites WHERE business_user_id = ?", [businessUserId]);
 
+    if (fetchAllDetails === "true" && favorites.length > 0) {
       const candidateIds = favorites.map(fav => fav.candidate_id).join(',');
 
-      const candidates = await connection(dbHelper.getSqlMultipleCandidates(candidateIds));
-      res.json({ success: true, favorites: favorites, candidates: candidates });
+      if (candidateIds) {
+        const candidates = await connection(dbHelper.getSqlMultipleCandidates(candidateIds));
+        res.json({ success: true, favorites: favorites, candidates: candidates });
+      } else {
+        res.json({ success: true, favorites: favorites, candidates: [] });
+      }
     } else {
-      favorites = await connection("SELECT * FROM favorites WHERE business_user_id = ?", [businessUserId]);
       res.json({ success: true, favorites: favorites });
     }
   } catch (error) {

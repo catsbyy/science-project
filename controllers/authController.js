@@ -76,7 +76,7 @@ exports.registerUser = async function (req, res) {
 
     try {
       await connectionPromise(query, values);
-      res.json({ message: "User registered successfully" });
+      res.status(201).json({ message: 'User registered successfully'});
     } catch (err) {
       console.error("Error inserting user into database:", err);
       res.status(500).json({ error: "Internal server error." });

@@ -22,7 +22,16 @@ module.exports = class Database {
       FROM candidate_details`;
     this.sqlGetAllCandidateIds = `SELECT id FROM candidate_details`;
     this.sqlInsertCandidateDetails =
-      "INSERT INTO candidate_details(name, surname, patronymic, date_of_birth, summary, profile_picture, region_id, city, street, house_number, mobile_number, email, linkedin, github, education_level_id, university, specialty, english_level_id, position_id, work_experience_id, work_area_id, salary_id, workplace_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+      "INSERT INTO candidate_details(name, surname, patronymic, date_of_birth, summary, profile_picture, region_id, city, street, house_number, mobile_number, email, linkedin, github, education_level_id, university, specialty, english_level_id, position_id, work_experience_id, work_area_id, salary_id, workplace_id, user_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    this.sqlUpdateCandidateDetails = `UPDATE candidate_details SET 
+        name = ?, surname = ?, patronymic = ?, date_of_birth = ?, 
+        summary = ?, profile_picture = ?, region_id = ?, city = ?, street = ?, 
+        house_number = ?, mobile_number = ?, email = ?, linkedin = ?, 
+        github = ?, education_level_id = ?, university = ?, specialty = ?, 
+        english_level_id = ?, position_id = ?, work_experience_id = ?, 
+        work_area_id = ?, salary_id = ?, workplace_id = ?, user_id = ?
+        WHERE id = ?`;
+    this.sqlDeleteTechTools = `DELETE FROM candidate_technology_tool WHERE candidate_id = ?`;
   }
 
   getSqlOneCandidate(candidateId, isByUserId) {

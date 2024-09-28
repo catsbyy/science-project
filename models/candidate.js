@@ -23,7 +23,8 @@ module.exports = class Candidate {
         this.candidateWorkArea = request.body.candidateWorkArea,
         this.candidateSalary = request.body.candidateSalary,
         this.candidateWorkplace = request.body.candidateWorkplace,
-        this.candidateTechAndTools = request.body.candidateTechAndTools
+        this.candidateTechAndTools = request.body.candidateTechAndTools,
+        this.userId = request.body.userId
     }
   };
   
